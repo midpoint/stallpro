@@ -4,7 +4,7 @@ App({
     userInfo: null,
     token: null,
     stallId: null,
-    apiBase: 'https://your-vercel-app.vercel.app/api'  // TODO: 替换为你的Vercel地址
+    apiBase: 'https://stallpro.vercel.app/api'
   },
 
   onLaunch(options) {
