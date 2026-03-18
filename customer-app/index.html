@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>老王鸡蛋灌饼 - 点餐</title>
+  <style>
+    :root {
+      --primary: #FF6B35;
+      --primary-light: #FF8F66;
+      --success: #52C41A;
+      --warning: #FAAD14;
+      --bg: #f5f5f5;
+      --white: #ffffff;
+      --text: #333;
+      --text-light: #666;
+      --border: #eee;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      max-width: 480px;
+      margin: 0 auto;
+      min-height: 100vh;
+      padding-bottom: 80px;
+    }
+
+    /* 头部 */
+    .header {
+      background: linear-gradient(135deg, var(--primary) 0%, #E55A2B 100%);
+      color: white;
+      padding: 24px 16px;
+      text-align: center;
+    }
+
+    .header h1 {
+      font-size: 20px;
+      margin-bottom: 8px;
+    }
+
+    .header .notice {
+      font-size: 14px;
+      opacity: 0.9;
+    }
+
+    /* 商品列表 */
+    .menu {
+      padding: 16px;
+    }
+
+    .menu-title {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 12px;
+      color: var(--text-light);
+    }
+
+    .product-card {
+      background: var(--white);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 12px;
+      display: flex;
+      gap: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+
+    .product-icon {
+      font-size: 40px;
+      width: 60px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #f9f9f9;
+      border-radius: 8px;
+    }
+
+    .product-info {
+      flex: 1;
+    }
+
+    .product-name {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .product-price {
+      color: var(--primary);
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .product-btn {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 8px 20px;
+      border-radius: 20px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    .product-btn:active {
+      opacity: 0.8;
+    }
+
+    /* 规格选择弹窗 */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.5);
+      display: flex;
+      align-items: flex-end;
+      z-index: 100;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s;
+    }
+
+    .modal-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .spec-modal {
+      background: var(--white);
+      border-radius: 20px 20px 0 0;
+      width: 100%;
+      max-width: 480px;
+      padding: 20px;
+      transform: translateY(100%);
+      transition: transform 0.3s;
+    }
+
+    .modal-overlay.active .spec-modal {
+      transform: translateY(0);
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .modal-title {
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    .modal-close {
+      font-size: 24px;
+      color: #999;
+      cursor: pointer;
+    }
+
+    .spec-group {
+      margin-bottom: 16px;
+    }
+
+    .spec-label {
+      font-size: 14px;
+      color: var(--text-light);
+      margin-bottom: 8px;
+    }
+
+    .spec-options {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .spec-option {
+      padding: 8px 16px;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    .spec-option.active {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
+
+    .modal-footer {
+      display: flex;
+      gap: 12px;
+      margin-top: 24px;
+    }
+
+    .modal-btn {
+      flex: 1;
+      padding: 14px;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+    }
+
+    .modal-btn.add {
+      background: var(--primary);
+      color: white;
+    }
+
+    .modal-btn.cancel {
+      background: #f0f0f0;
+      color: var(--text);
+    }
+
+    /* 购物车 */
+    .cart-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      max-width: 480px;
+      margin: 0 auto;
+      background: #333;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      z-index: 50;
+    }
+
+    .cart-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .cart-icon {
+      font-size: 28px;
+      position: relative;
+    }
+
+    .cart-count {
+      position: absolute;
+      top: -4px;
+      right: -8px;
+      background: var(--primary);
+      color: white;
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 10px;
+      min-width: 18px;
+      text-align: center;
+    }
+
+    .cart-total {
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .cart-btn {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 24px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .cart-btn:disabled {
+      background: #666;
+      cursor: not-allowed;
+    }
+
+    /* 订单页 */
+    .order-page {
+      display: none;
+    }
+
+    .order-page.active {
+      display: block;
+    }
+
+    .order-card {
+      background: var(--white);
+      margin: 16px;
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+    }
+
+    .order-number-label {
+      font-size: 14px;
+      color: var(--text-light);
+      margin-bottom: 8px;
+    }
+
+    .order-number {
+      font-size: 48px;
+      font-weight: 900;
+      color: var(--primary);
+      margin-bottom: 20px;
+    }
+
+    .order-items {
+      text-align: left;
+      margin-bottom: 20px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .order-item {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      font-size: 14px;
+    }
+
+    .order-total {
+      display: flex;
+      justify-content: space-between;
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 20px;
+    }
+
+    .order-status {
+      padding: 8px 16px;
+      background: #f0f0f0;
+      border-radius: 20px;
+      font-size: 14px;
+      display: inline-block;
+    }
+
+    .order-status.paid {
+      background: #f6ffed;
+      color: var(--success);
+    }
+
+    .waiting-info {
+      padding: 16px;
+      text-align: center;
+      color: var(--text-light);
+    }
+
+    /* 底部导航 */
+    .tab-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      max-width: 480px;
+      margin: 0 auto;
+      display: flex;
+      background: var(--white);
+      border-top: 1px solid var(--border);
+      z-index: 50;
+    }
+
+    .tab-item {
+      flex: 1;
+      text-align: center;
+      padding: 12px;
+      font-size: 12px;
+      color: var(--text-light);
+      cursor: pointer;
+    }
+
+    .tab-item.active {
+      color: var(--primary);
+    }
+
+    .tab-icon {
+      font-size: 20px;
+      margin-bottom: 2px;
+      display: block;
+    }
+
+    /* 语音按钮 */
+    .voice-btn {
+      position: fixed;
+      bottom: 100px;
+      right: 20px;
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: var(--primary);
+      color: white;
+      border: none;
+      font-size: 24px;
+      box-shadow: 0 4px 12px rgba(255,107,53,0.4);
+      cursor: pointer;
+      z-index: 60;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .voice-btn:active {
+      transform: scale(0.95);
+    }
+
+    /* 等待页 */
+    .wait-page {
+      display: none;
+      text-align: center;
+      padding: 40px 20px;
+    }
+
+    .wait-page.active {
+      display: block;
+    }
+
+    .wait-animation {
+      font-size: 60px;
+      margin-bottom: 20px;
+      animation: bounce 1s infinite;
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    .wait-title {
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .wait-subtitle {
+      color: var(--text-light);
+      margin-bottom: 24px;
+    }
+  </style>
+</head>
+<body>
+  <!-- 点餐页 -->
+  <div id="menu-page" class="menu-page">
+    <div class="header">
+      <h1>🏪 老王鸡蛋灌饼</h1>
+      <div class="notice">📢 今日特惠：加肠免费！</div>
+    </div>
+
+    <div class="menu">
+      <div class="menu-title">🍔 招牌主食</div>
+
+      <div class="product-card">
+        <div class="product-icon">🥚</div>
+        <div class="product-info">
+          <div class="product-name">鸡蛋灌饼</div>
+          <div class="product-price">¥8</div>
+        </div>
+        <button class="product-btn" onclick="showSpec(1)">点餐</button>
+      </div>
+
+      <div class="product-card">
+        <div class="product-icon">🌭</div>
+        <div class="product-info">
+          <div class="product-name">手抓饼</div>
+          <div class="product-price">¥10</div>
+        </div>
+        <button class="product-btn" onclick="showSpec(2)">点餐</button>
+      </div>
+
+      <div class="product-card">
+        <div class="product-icon">🍜</div>
+        <div class="product-info">
+          <div class="product-name">烤冷面</div>
+          <div class="product-price">¥8</div>
+        </div>
+        <button class="product-btn" onclick="showSpec(3)">点餐</button>
+      </div>
+
+      <div class="menu-title">🍡 美味小吃</div>
+
+      <div class="product-card">
+        <div class="product-icon">🌭</div>
+        <div class="product-info">
+          <div class="product-name">烤肠</div>
+          <div class="product-price">¥2</div>
+        </div>
+        <button class="product-btn" onclick="addToCart({id:4,name:'烤肠',price:2,specs:''})">点餐</button>
+      </div>
+
+      <div class="product-card">
+        <div class="product-icon">🥛</div>
+        <div class="product-info">
+          <div class="product-name">冰豆浆</div>
+          <div class="product-price">¥3</div>
+        </div>
+        <button class="product-btn" onclick="addToCart({id:5,name:'冰豆浆',price:3,specs:''})">点餐</button>
+      </div>
+    </div>
+
+    <!-- 购物车栏 -->
+    <div class="cart-bar">
+      <div class="cart-info">
+        <div class="cart-icon">
+          🛒
+          <span class="cart-count" id="cart-count">0</span>
+        </div>
+        <div class="cart-total">¥<span id="cart-total">0</span></div>
+      </div>
+      <button class="cart-btn" id="checkout-btn" onclick="checkout()" disabled>去结算</button>
+    </div>
+
+    <!-- 语音按钮 -->
+    <button class="voice-btn" onclick="startVoice()">🎤</button>
+  </div>
+
+  <!-- 规格选择弹窗 -->
+  <div class="modal-overlay" id="spec-modal">
+    <div class="spec-modal">
+      <div class="modal-header">
+        <div class="modal-title" id="modal-product-name">商品名称</div>
+        <div class="modal-close" onclick="closeModal()">✕</div>
+      </div>
+
+      <div class="spec-group">
+        <div class="spec-label">大小</div>
+        <div class="spec-options" id="spec-size">
+          <span class="spec-option active" onclick="selectSpec(this,'size')">小份</span>
+          <span class="spec-option" onclick="selectSpec(this,'size')">大份 +¥2</span>
+        </div>
+      </div>
+
+      <div class="spec-group">
+        <div class="spec-label">加料</div>
+        <div class="spec-options" id="spec-add">
+          <span class="spec-option" onclick="toggleSpec(this,'加肠 +¥2')">加肠 +¥2</span>
+          <span class="spec-option" onclick="toggleSpec(this,'加烤肠 +¥3')">加烤肠 +¥3</span>
+          <span class="spec-option" onclick="toggleSpec(this,'加辣条 +¥2')">加辣条 +¥2</span>
+        </div>
+      </div>
+
+      <div class="spec-group">
+        <div class="spec-label">口味</div>
+        <div class="spec-options" id="spec-taste">
+          <span class="spec-option" onclick="toggleSpec(this,'不要香菜')">不要香菜</span>
+          <span class="spec-option" onclick="toggleSpec(this,'不要辣')">不要辣</span>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="modal-btn cancel" onclick="closeModal()">取消</button>
+        <button class="modal-btn add" onclick="confirmAdd()">加入购物车</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 订单页 -->
+  <div id="order-page" class="order-page">
+    <div class="header">
+      <h1>📋 订单详情</h1>
+    </div>
+
+    <div class="order-card">
+      <div class="order-number-label">取餐号</div>
+      <div class="order-number" id="order-number">A05</div>
+
+      <div class="order-items" id="order-items">
+        <!-- 订单详情 -->
+      </div>
+
+      <div class="order-total">
+        <span>实付</span>
+        <span style="color:var(--primary)">¥<span id="order-total">0</span></span>
+      </div>
+
+      <div class="order-status paid">✓ 支付成功</div>
+    </div>
+
+    <div class="waiting-info">
+      <div>正在制作中，请稍候...</div>
+    </div>
+
+    <div class="wait-page active">
+      <div class="wait-animation">🍳</div>
+      <div class="wait-title">制作中...</div>
+      <div class="wait-subtitle">预计等待 5-10 分钟</div>
+      <div style="color: var(--text-light); font-size: 14px;">
+        当前排队：2人
+      </div>
+    </div>
+  </div>
+
+  <!-- 底部Tab -->
+  <div class="tab-bar">
+    <div class="tab-item active" onclick="switchTab('menu')">
+      <span class="tab-icon">🏠</span>
+      点餐
+    </div>
+    <div class="tab-item" onclick="switchTab('order')">
+      <span class="tab-icon">📋</span>
+      订单
+    </div>
+    <div class="tab-item">
+      <span class="tab-icon">👤</span>
+      我的
+    </div>
+  </div>
+
+  <script>
+    // 商品数据
+    const products = {
+      1: { name: '鸡蛋灌饼', price: 8, icon: '🥚' },
+      2: { name: '手抓饼', price: 10, icon: '🌭' },
+      3: { name: '烤冷面', price: 8, icon: '🍜' },
+      4: { name: '烤肠', price: 2, icon: '🌭' },
+      5: { name: '冰豆浆', price: 3, icon: '🥛' }
+    };
+
+    // 购物车
+    let cart = [];
+    let currentProduct = null;
+    let selectedSpecs = { size: '小份', add: [], taste: [] };
+
+    // 显示规格弹窗
+    function showSpec(productId) {
+      currentProduct = products[productId];
+      selectedSpecs = { size: '小份', add: [], taste: [] };
+
+      document.getElementById('modal-product-name').textContent = currentProduct.name;
+
+      // 重置选项
+      document.querySelectorAll('.spec-options .spec-option').forEach(el => {
+        el.classList.remove('active');
+      });
+      document.querySelector('#spec-size .spec-option:first-child').classList.add('active');
+
+      document.getElementById('spec-modal').classList.add('active');
+    }
+
+    // 关闭弹窗
+    function closeModal() {
+      document.getElementById('spec-modal').classList.remove('active');
+    }
+
+    // 选择规格
+    function selectSpec(el, type) {
+      document.querySelectorAll(`#spec-${type} .spec-option`).forEach(opt => {
+        opt.classList.remove('active');
+      });
+      el.classList.add('active');
+      selectedSpecs[type] = el.textContent;
+    }
+
+    // 切换多选规格
+    function toggleSpec(el, text) {
+      el.classList.toggle('active');
+      if (el.classList.contains('active')) {
+        selectedSpecs.add.push(text);
+      } else {
+        const idx = selectedSpecs.add.indexOf(text);
+        if (idx > -1) selectedSpecs.add.splice(idx, 1);
+      }
+    }
+
+    // 确认添加
+    function confirmAdd() {
+      let totalPrice = currentProduct.price;
+      let specsStr = '';
+
+      // 计算规格价格
+      if (selectedSpecs.size.includes('大份')) {
+        totalPrice += 2;
+      }
+
+      selectedSpecs.add.forEach(item => {
+        if (item.includes('+¥2')) totalPrice += 2;
+        if (item.includes('+¥3')) totalPrice += 3;
+        specsStr += item.replace(/\+\¥\d+/, '') + ',';
+      });
+
+      selectedSpecs.taste.forEach(item => {
+        specsStr += item + ',';
+      });
+
+      specsStr = specsStr.replace(/,$/, '');
+
+      const item = {
+        id: currentProduct.id,
+        name: currentProduct.name,
+        price: totalPrice,
+        specs: specsStr
+      };
+
+      addToCart(item);
+      closeModal();
+    }
+
+    // 加入购物车
+    function addToCart(item) {
+      cart.push(item);
+      updateCart();
+    }
+
+    // 更新购物车
+    function updateCart() {
+      const count = cart.length;
+      const total = cart.reduce((sum, item) => sum + item.price, 0);
+
+      document.getElementById('cart-count').textContent = count;
+      document.getElementById('cart-total').textContent = total;
+      document.getElementById('checkout-btn').disabled = count === 0;
+    }
+
+    // 结算
+    function checkout() {
+      // 显示订单页
+      document.getElementById('menu-page').style.display = 'none';
+      document.getElementById('order-page').classList.add('active');
+
+      // 生成取餐号
+      const orderNum = 'A' + String(Math.floor(Math.random() * 20) + 1).padStart(2, '0');
+      document.getElementById('order-number').textContent = orderNum;
+
+      // 显示订单详情
+      const orderItemsEl = document.getElementById('order-items');
+      let orderTotal = 0;
+      orderItemsEl.innerHTML = cart.map(item => {
+        orderTotal += item.price;
+        return `<div class="order-item">
+          <span>${item.name} ${item.specs ? '(' + item.specs + ')' : ''}</span>
+          <span>¥${item.price}</span>
+        </div>`;
+      }).join('');
+
+      document.getElementById('order-total').textContent = orderTotal;
+    }
+
+    // 切换Tab
+    function switchTab(tab) {
+      document.querySelectorAll('.tab-item').forEach((el, idx) => {
+        el.classList.toggle('active', idx === (tab === 'menu' ? 0 : 1));
+      });
+
+      if (tab === 'menu') {
+        document.getElementById('menu-page').style.display = 'block';
+        document.getElementById('order-page').classList.remove('active');
+      } else if (tab === 'order') {
+        document.getElementById('menu-page').style.display = 'none';
+        document.getElementById('order-page').classList.add('active');
+      }
+    }
+
+    // 语音点餐（模拟）
+    function startVoice() {
+      alert('语音识别功能需要麦克风权限\n\n模拟：识别到"我要一个鸡蛋灌饼，加肠"');
+      showSpec(1);
+    }
+
+    // 模拟被叫号
+    setTimeout(() => {
+      if (document.getElementById('order-page').classList.contains('active')) {
+        alert('🔔 您的取餐号 A05 已完成，请取餐！');
+      }
+    }, 15000);
+  </script>
+</body>
+</html>
