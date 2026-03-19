@@ -1,5 +1,16 @@
 <!--pages/stall/index.wxml-->
 <view class="container">
+  <!-- 店铺头部 -->
+  <view class="stall-header">
+    <view class="stall-info">
+      <view class="stall-name">{{stall.name}}</view>
+      <view class="stall-notice">{{stall.notice}}</view>
+    </view>
+    <view class="stall-actions">
+      <view class="action-btn" bindtap="showQrcode">📲二维码</view>
+    </view>
+  </view>
+
   <!-- 统计卡片 -->
   <view class="stats-card">
     <view class="stats-item">
@@ -18,35 +29,121 @@
     </view>
   </view>
 
+  <!-- 快捷操作 -->
+  <view class="quick-actions">
+    <view class="quick-action" bindtap="goToProducts">
+      <view class="quick-icon">🍔</view>
+      <view class="quick-text">商品管理</view>
+    </view>
+    <view class="quick-action" bindtap="goToSettings">
+      <view class="quick-icon">⚙️</view>
+      <view class="quick-text">店铺设置</view>
+    </view>
+    <view class="quick-action" bindtap="testOrder">
+      <view class="quick-icon">🧪</view>
+      <view class="quick-text">测试订单</view>
+    </view>
+    <view class="quick-action" bindtap="testCall">
+      <view class="quick-icon">🔔</view>
+      <view class="quick-text">测试叫号</view>
+    </view>
+  </view>
+
   <!-- 订单列表 -->
   <view class="order-section">
-    <view class="section-title">订单列表</view>
-    <block wx:for="{{orders}}" wx:key="id">
-      <view class="order-card {{item.status}}">
-        <view class="order-header">
-          <view class="order-number">{{item.orderNumber}}</view>
-          <view class="order-status {{item.status}}">
-            {{item.status === 'pending' ? '待接单' : item.status === 'cooking' ? '制作中' : '已完成'}}
+    <view class="section-title">
+      <text>订单列表</text>
+      <text class="order-count" wx:if="{{orders.length > 0}}">{{orders.length}}单</text>
+    </view>
+
+    <!-- 待接单订单 -->
+    <view class="order-group" wx:if="{{pendingOrders.length > 0}}">
+      <view class="group-title">待接单 ({{pendingOrders.length}})</view>
+      <block wx:for="{{pendingOrders}}" wx:key="id">
+        <view class="order-card pending">
+          <view class="order-header">
+            <view class="order-number">{{item.orderNumber}}</view>
+            <view class="order-time">{{item.createdAt}}</view>
+          </view>
+          <view class="order-items">
+            <block wx:for="{{item.items}}" wx:for-item="food" wx:key="name">
+              <view class="order-food">{{food.name}} <text wx:if="{{food.specs}}">({{food.specs}})</text> x{{food.quantity}}</view>
+            </block>
+          </view>
+          <view class="order-footer">
+            <view class="order-amount">¥{{item.totalAmount}}</view>
+            <view class="order-actions">
+              <button size="mini" type="primary" bindtap="acceptOrder" data-id="{{item.id}}">接单</button>
+            </view>
           </view>
         </view>
-        <view class="order-items">
-          <block wx:for="{{item.items}}" wx:for-item="food" wx:key="name">
-            <view class="order-food">{{food.name}} x{{food.quantity}}</view>
-          </block>
-        </view>
-        <view class="order-footer">
-          <view class="order-amount">¥{{item.totalAmount}}</view>
-          <view class="order-actions">
-            <button wx:if="{{item.status === 'pending'}}" size="mini" type="primary" bindtap="acceptOrder" data-id="{{item.id}}">接单</button>
-            <button wx:if="{{item.status === 'cooking'}}" size="mini" type="success" bindtap="completeOrder" data-id="{{item.id}}">完成</button>
-            <button wx:if="{{item.status === 'completed'}}" size="mini" bindtap="callNumber" data-id="{{item.id}}">叫号</button>
+      </block>
+    </view>
+
+    <!-- 制作中订单 -->
+    <view class="order-group" wx:if="{{cookingOrders.length > 0}}">
+      <view class="group-title cooking">制作中 ({{cookingOrders.length}})</view>
+      <block wx:for="{{cookingOrders}}" wx:key="id">
+        <view class="order-card cooking">
+          <view class="order-header">
+            <view class="order-number">{{item.orderNumber}}</view>
+            <view class="order-time">{{item.createdAt}}</view>
+          </view>
+          <view class="order-items">
+            <block wx:for="{{item.items}}" wx:for-item="food" wx:key="name">
+              <view class="order-food">{{food.name}} x{{food.quantity}}</view>
+            </block>
+          </view>
+          <view class="order-footer">
+            <view class="order-amount">¥{{item.totalAmount}}</view>
+            <view class="order-actions">
+              <button size="mini" type="success" bindtap="completeOrder" data-id="{{item.id}}">完成</button>
+            </view>
           </view>
         </view>
-      </view>
-    </block>
+      </block>
+    </view>
+
+    <!-- 已完成订单 -->
+    <view class="order-group" wx:if="{{completedOrders.length > 0}}">
+      <view class="group-title completed">已完成 ({{completedOrders.length}})</view>
+      <block wx:for="{{completedOrders}}" wx:key="id">
+        <view class="order-card completed">
+          <view class="order-header">
+            <view class="order-number">{{item.orderNumber}}</view>
+            <view class="order-status done">已完成</view>
+          </view>
+          <view class="order-items">
+            <block wx:for="{{item.items}}" wx:for-item="food" wx:key="name">
+              <view class="order-food">{{food.name}} x{{food.quantity}}</view>
+            </block>
+          </view>
+          <view class="order-footer">
+            <view class="order-amount">¥{{item.totalAmount}}</view>
+            <view class="order-actions">
+              <button size="mini" bindtap="callNumber" data-id="{{item.id}}">叫号</button>
+            </view>
+          </view>
+        </view>
+      </block>
+    </view>
   </view>
 
   <view class="empty" wx:if="{{orders.length === 0}}">
+    <view class="empty-icon">📭</view>
     <view>暂无订单</view>
+    <view class="empty-tip">扫码点餐功能已在设置中开启</view>
+  </view>
+
+  <!-- 二维码弹窗 -->
+  <view class="qrcode-modal {{showQrcodeModal ? 'show' : ''}}" bindtap="hideQrcode">
+    <view class="qrcode-content" catchtap="true">
+      <view class="qrcode-title">扫码点餐</view>
+      <view class="qrcode-image">
+        <image src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://stallpro.vercel.app/menu?stallId={{stallId}}" />
+      </view>
+      <view class="qrcode-tip">顾客扫码直接点餐</view>
+      <view class="qrcode-link">https://stallpro.vercel.app/menu?stallId={{stallId}}</view>
+    </view>
   </view>
 </view>

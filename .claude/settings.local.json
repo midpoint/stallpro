@@ -56,7 +56,8 @@
       "Bash(npm run build 2>&1 | tail -10)",
       "Bash(git add -A && git commit -m \"fix: 修复登录按钮样式\" && git push origin master)",
       "Bash(git add -A && git commit -m \"fix: 修改tabBar顺序，默认进入摊主管理页面\" && git push origin master)",
-      "Bash(git add -A && git commit -m \"feat: 点餐页面添加'我是摊主'按钮快速切换到管理后台\" && git push origin master)"
+      "Bash(git add -A && git commit -m \"feat: 点餐页面添加'我是摊主'按钮快速切换到管理后台\" && git push origin master)",
+      "Bash(git add -A && git commit -m \"feat: 完善小程序管理页面功能\n\n- 添加店铺头部信息（名称、公告）\n- 添加快捷操作入口（商品管理、店铺设置、测试订单、测试叫号）\n- 订单分组显示（待接单、制作中、已完成）\n- 添加二维码弹窗（扫码点餐）\n- 优化订单卡片样式和空状态显示\n\nCo-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>\n\" && git push origin master)"
     ]
   }
 }

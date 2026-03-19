@@ -3,14 +3,52 @@
   min-height: 100vh;
   background: #f5f5f5;
   padding: 20rpx;
+  padding-bottom: 40rpx;
 }
 
+/* 店铺头部 */
+.stall-header {
+  background: linear-gradient(135deg, #FF6B35 0%, #E55A2B 100%);
+  border-radius: 16rpx;
+  padding: 30rpx;
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 20rpx;
+}
+
+.stall-name {
+  font-size: 36rpx;
+  font-weight: bold;
+  margin-bottom: 8rpx;
+}
+
+.stall-notice {
+  font-size: 24rpx;
+  opacity: 0.9;
+}
+
+.stall-actions {
+  display: flex;
+  gap: 10rpx;
+}
+
+.action-btn {
+  font-size: 22rpx;
+  background: rgba(255,255,255,0.2);
+  padding: 10rpx 20rpx;
+  border-radius: 30rpx;
+}
+
+/* 统计卡片 */
 .stats-card {
   background: white;
   border-radius: 16rpx;
   padding: 30rpx;
   display: flex;
   margin-bottom: 20rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0,0,0,0.06);
 }
 
 .stats-item {
@@ -35,6 +73,35 @@
   background: #eee;
 }
 
+/* 快捷操作 */
+.quick-actions {
+  display: flex;
+  background: white;
+  border-radius: 16rpx;
+  padding: 20rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0,0,0,0.06);
+}
+
+.quick-action {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 16rpx;
+}
+
+.quick-icon {
+  font-size: 40rpx;
+  margin-bottom: 8rpx;
+}
+
+.quick-text {
+  font-size: 22rpx;
+  color: #666;
+}
+
+/* 订单区域 */
 .order-section {
   margin-top: 20rpx;
 }
@@ -43,6 +110,38 @@
   font-size: 30rpx;
   font-weight: bold;
   margin-bottom: 16rpx;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.order-count {
+  font-size: 24rpx;
+  color: #999;
+  font-weight: normal;
+}
+
+.order-group {
+  margin-bottom: 20rpx;
+}
+
+.group-title {
+  font-size: 26rpx;
+  color: #FF6B35;
+  font-weight: 600;
+  margin-bottom: 12rpx;
+  padding-left: 8rpx;
+  border-left: 4rpx solid #FF6B35;
+}
+
+.group-title.cooking {
+  color: #FAAD14;
+  border-left-color: #FAAD14;
+}
+
+.group-title.completed {
+  color: #52C41A;
+  border-left-color: #52C41A;
 }
 
 .order-card {
@@ -51,6 +150,7 @@
   padding: 24rpx;
   margin-bottom: 16rpx;
   border-left: 8rpx solid #ddd;
+  box-shadow: 0 2rpx 8rpx rgba(0,0,0,0.06);
 }
 
 .order-card.pending {
@@ -63,6 +163,7 @@
 
 .order-card.completed {
   border-left-color: #52C41A;
+  opacity: 0.7;
 }
 
 .order-header {
@@ -75,6 +176,11 @@
 .order-number {
   font-size: 36rpx;
   font-weight: bold;
+}
+
+.order-time {
+  font-size: 22rpx;
+  color: #999;
 }
 
 .order-status {
@@ -93,7 +199,8 @@
   color: #FAAD14;
 }
 
-.order-status.completed {
+.order-status.completed,
+.order-status.done {
   background: #F6FFED;
   color: #52C41A;
 }
@@ -128,8 +235,84 @@
   gap: 10rpx;
 }
 
+/* 空状态 */
 .empty {
   text-align: center;
   padding: 100rpx;
   color: #999;
+}
+
+.empty-icon {
+  font-size: 80rpx;
+  margin-bottom: 20rpx;
+}
+
+.empty-tip {
+  font-size: 24rpx;
+  color: #bbb;
+  margin-top: 10rpx;
+}
+
+/* 二维码弹窗 */
+.qrcode-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s;
+}
+
+.qrcode-modal.show {
+  opacity: 1;
+  visibility: visible;
+}
+
+.qrcode-content {
+  background: white;
+  border-radius: 24rpx;
+  padding: 40rpx;
+  text-align: center;
+  width: 80%;
+  max-width: 320rpx;
+  transform: translateY(100%);
+  transition: transform 0.3s;
+}
+
+.qrcode-modal.show .qrcode-content {
+  transform: translateY(0);
+}
+
+.qrcode-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  margin-bottom: 30rpx;
+}
+
+.qrcode-image {
+  margin-bottom: 20rpx;
+}
+
+.qrcode-image image {
+  width: 300rpx;
+  height: 300rpx;
+}
+
+.qrcode-tip {
+  font-size: 26rpx;
+  color: #666;
+  margin-bottom: 16rpx;
+}
+
+.qrcode-link {
+  font-size: 20rpx;
+  color: #999;
+  word-break: break-all;
 }
