@@ -41,7 +41,15 @@
       "Bash(git add -A && git commit -m \"fix: 将应用名称更新为摆摊666\" && git push origin master)",
       "Bash(git add miniprogram/project.config.json && git commit -m \"config: 添加小程序AppID配置\" && git push origin master)",
       "Bash(git add -A && git commit -m \"feat: 区分顾客端和摊主端，顾客扫码点餐无需登录\" && git push origin master)",
-      "Bash(git add -A && git commit -m \"feat: 添加微信支付功能，顾客点餐后需支付\" && git push origin master)"
+      "Bash(git add -A && git commit -m \"feat: 添加微信支付功能，顾客点餐后需支付\" && git push origin master)",
+      "Bash(npm run build 2>&1 | head -30)",
+      "Bash(npx vercel --prod 2>&1 | tail -30)",
+      "Bash(echo \"y\" | npx vercel --prod 2>&1 | tail -30)",
+      "Bash(npx vercel --prod --yes 2>&1 | tail -30)",
+      "Bash(git add src/App.css src/App.js && git commit -m \"$\\(cat <<'EOF'\n完善摊主后台设置功能\n\n- 添加点餐二维码生成（顾客扫码直接点餐）\n- 添加商品管理功能（添加/编辑/删除/上下架）\n- 增强统计页面（热销商品、支付方式、时间分布等）\n\nCo-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git push origin master)",
+      "Bash(npm run build 2>&1 | tail -15)",
+      "Bash(git add -A && git commit -m \"$\\(cat <<'EOF'\n实现多摊主数据隔离\n\n- 添加摊主登录功能，每个摊主独立账户\n- 登录后自动加载自己店铺的商品和订单\n- 点餐二维码使用摊主自己的stallId\n- 添加退出登录功能\n- 摊主只能看到自己店铺的数据\n\nCo-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>\nEOF\n\\)\")"
     ]
   }
 }

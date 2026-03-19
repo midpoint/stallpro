@@ -3,6 +3,72 @@ import { QRCodeSVG } from 'qrcode.react';
 import { stallInfo, initialOrders, products, statusMap, generateOrderNumber } from './data/mockData';
 import './App.css';
 
+const API_BASE = 'https://stallpro.vercel.app/api';
+
+// 登录组件
+const LoginPage = ({ onLogin }) => {
+  const [loading, setLoading] = useState(false);
+  const [nickname, setNickname] = useState('');
+
+  const handleLogin = async () => {
+    if (!nickname.trim()) {
+      alert('请输入昵称');
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const res = await fetch(`${API_BASE}/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          code: `web_${Date.now()}`,
+          userInfo: { nickName: nickname }
+        })
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        localStorage.setItem('stall_token', data.data.token);
+        localStorage.setItem('stall_user', JSON.stringify(data.data.user));
+        onLogin(data.data.user);
+      } else {
+        alert(data.message || '登录失败');
+      }
+    } catch (e) {
+      alert('网络错误，请重试');
+    }
+
+    setLoading(false);
+  };
+
+  return (
+    <div className="login-page">
+      <div className="login-card">
+        <div className="login-logo">🏪</div>
+        <h1>摆摊666</h1>
+        <p className="login-subtitle">摊主管理后台</p>
+
+        <div className="login-form">
+          <input
+            type="text"
+            placeholder="请输入您的昵称"
+            value={nickname}
+            onChange={(e) => setNickname(e.target.value)}
+            className="login-input"
+          />
+          <button className="btn btn-primary btn-block" onClick={handleLogin} disabled={loading}>
+            {loading ? '登录中...' : '登录'}
+          </button>
+        </div>
+
+        <p className="login-tip">登录后可管理自己的店铺、接收订单</p>
+      </div>
+    </div>
+  );
+};
+
 // 语音播报函数
 const speak = (text) => {
   if ('speechSynthesis' in window) {
@@ -140,11 +206,96 @@ const simulateNewOrder = (setOrders) => {
 
 // 主应用组件
 function App() {
-  const [orders, setOrders] = useState(initialOrders);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
+  const [orders, setOrders] = useState([]);
   const [currentView, setCurrentView] = useState('orders');
   const [callNumber, setCallNumber] = useState(null);
   const [showCallScreen, setShowCallScreen] = useState(false);
-  const [productsList, setProductsList] = useState(products);
+  const [productsList, setProductsList] = useState([]);
+  const [stallInfoData, setStallInfoData] = useState({ name: '加载中...', notice: '' });
+
+  // 检查登录状态
+  useEffect(() => {
+    const token = localStorage.getItem('stall_token');
+    const userStr = localStorage.getItem('stall_user');
+    if (token && userStr) {
+      const user = JSON.parse(userStr);
+      setCurrentUser(user);
+      setIsLoggedIn(true);
+      // 加载店铺数据
+      loadStallData(user.stallId);
+    }
+  }, []);
+
+  // 从API加载店铺数据
+  const loadStallData = async (stallId) => {
+    try {
+      // 加载店铺信息
+      const stallRes = await fetch(`${API_BASE}/stall/${stallId}`);
+      const stallData = await stallRes.json();
+      if (stallData.success) {
+        setStallInfoData(stallData.data);
+      }
+
+      // 加载商品列表
+      const productRes = await fetch(`${API_BASE}/product/stall/${stallId}`);
+      const productData = await productRes.json();
+      if (productData.success) {
+        // 转换API数据格式
+        setProductsList(productData.data.map((p, idx) => ({
+          id: idx + 1,
+          name: p.name,
+          price: p.price,
+          category: p.category || '主食',
+          image: '🥚',
+          status: p.status || 'active'
+        })));
+      }
+
+      // 加载订单列表
+      const orderRes = await fetch(`${API_BASE}/order/stall/${stallId}`);
+      const orderData = await orderRes.json();
+      if (orderData.success && orderData.data.list) {
+        setOrders(orderData.data.list.map(o => ({
+          id: o._id,
+          orderNumber: o.orderNumber,
+          items: o.items,
+          totalAmount: o.totalAmount,
+          status: o.status === 'pending' ? 'pending' : o.status === 'cooking' ? 'cooking' : o.status === 'completed' ? 'completed' : 'taken',
+          paymentStatus: o.paymentStatus,
+          paymentMethod: 'wechat',
+          createdAt: o.createdAt
+        })));
+      }
+
+      // 加载统计
+      const statsRes = await fetch(`${API_BASE}/stats/today/${stallId}`);
+      const statsData = await statsRes.json();
+      if (statsData.success) {
+        // 可以更新统计显示
+      }
+    } catch (e) {
+      console.error('加载数据失败', e);
+    }
+  };
+
+  // 处理登录成功
+  const handleLogin = (user) => {
+    setCurrentUser(user);
+    setIsLoggedIn(true);
+    loadStallData(user.stallId);
+  };
+
+  // 退出登录
+  const handleLogout = () => {
+    localStorage.removeItem('stall_token');
+    localStorage.removeItem('stall_user');
+    setIsLoggedIn(false);
+    setCurrentUser(null);
+    setOrders([]);
+    setProductsList([]);
+  };
 
   // 商品弹窗状态
   const [showProductModal, setShowProductModal] = useState(false);
@@ -288,6 +439,11 @@ function App() {
   const pendingCount = orders.filter(o => o.status === 'pending').length;
   const cookingCount = orders.filter(o => o.status === 'cooking').length;
 
+  // 未登录显示登录页
+  if (!isLoggedIn) {
+    return <LoginPage onLogin={handleLogin} />;
+  }
+
   return (
     <div className="app">
       {/* 叫号大屏 */}
@@ -299,8 +455,12 @@ function App() {
       {/* 顶部栏 */}
       <header className="header">
         <div className="stall-info">
-          <h1>{stallInfo.name}</h1>
-          <p>{stallInfo.notice}</p>
+          <h1>{stallInfoData.name}</h1>
+          <p>{stallInfoData.notice}</p>
+        </div>
+        <div className="header-user">
+          <span className="user-name">{currentUser?.nickname}</span>
+          <button className="btn-logout" onClick={handleLogout}>退出</button>
         </div>
       </header>
 
@@ -659,6 +819,11 @@ function App() {
                   <span className="slider"></span>
                 </label>
               </div>
+              <div className="settings-item" onClick={handleLogout}>
+                <span className="settings-icon">🚪</span>
+                <span>退出登录</span>
+                <span className="settings-arrow">></span>
+              </div>
               <div className="settings-item" onClick={() => setShowSettingsModal('about')}>
                 <span className="settings-icon">ℹ️</span>
                 <span>关于</span>
@@ -822,7 +987,7 @@ function App() {
                             <button
                               className="btn btn-primary btn-block"
                               onClick={() => {
-                                const stallId = 'stall1';
+                                const stallId = currentUser?.stallId || 'stall1';
                                 const orderUrl = `https://stallpro.vercel.app/menu?stallId=${stallId}`;
                                 setSettings(prev => ({...prev, orderQrcodeUrl: orderUrl, orderQrcodeGenerated: true}));
                               }}
