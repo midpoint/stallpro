@@ -46,12 +46,20 @@ Page({
     stallId = stallId.toString().trim();
     const that = this;
 
+    // 优先从本地存储加载店铺信息
+    const localStallInfo = wx.getStorageSync('stall_info');
+    if (localStallInfo) {
+      that.setData({ stall: localStallInfo });
+    }
+
     // 加载店铺信息
     wx.request({
       url: `${API_BASE}/stall/${stallId}`,
       success(res) {
-        if (res.data.success) {
+        if (res.data.success && res.data.data) {
           that.setData({ stall: res.data.data });
+          // 更新本地存储
+          wx.setStorageSync('stall_info', res.data.data);
         }
       }
     });

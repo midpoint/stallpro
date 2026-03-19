@@ -31,21 +31,29 @@ Page({
     stallId = stallId.toString().trim();
     const that = this;
 
-    // 加载店铺信息
-    wx.request({
-      url: `${API_BASE}/stall/${stallId}`,
-      success(res) {
-        if (res.data.success) {
-          that.setData({ stall: res.data.data });
-        }
-      }
-    });
+    // 优先从本地存储加载店铺信息
+    const localStallInfo = wx.getStorageSync('stall_info');
+    if (localStallInfo) {
+      that.setData({ stall: localStallInfo });
+    }
 
     // 从本地存储加载设置
     const localSettings = wx.getStorageSync('stall_settings');
     if (localSettings) {
       this.setData({ settings: localSettings });
     }
+
+    // 再从API获取最新数据
+    wx.request({
+      url: `${API_BASE}/stall/${stallId}`,
+      success(res) {
+        if (res.data.success && res.data.data) {
+          that.setData({ stall: res.data.data });
+          // 更新本地存储
+          wx.setStorageSync('stall_info', res.data.data);
+        }
+      }
+    });
   },
 
   // 编辑店铺名称
