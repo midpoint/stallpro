@@ -260,6 +260,13 @@ Page({
     });
   },
 
+  // 切换到摊主后台
+  switchToOwner() {
+    wx.switchTab({
+      url: '/pages/stall/index'
+    });
+  },
+
   onPullDownRefresh() {
     const stallId = app.globalData.stallId || 'stall1';
     this.loadData(stallId);

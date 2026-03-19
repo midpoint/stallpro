@@ -55,7 +55,8 @@
       "Bash(git add -A && git commit -m \"$\\(cat <<'EOF'\n添加测试登录功能，方便调试\n\n- 添加测试登录按钮，直接使用mock数据\n- 无需调用后端API即可进入后台\n- 便于在开发调试阶段使用\n\nCo-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>\nEOF\n\\)\" && git push origin master)",
       "Bash(npm run build 2>&1 | tail -10)",
       "Bash(git add -A && git commit -m \"fix: 修复登录按钮样式\" && git push origin master)",
-      "Bash(git add -A && git commit -m \"fix: 修改tabBar顺序，默认进入摊主管理页面\" && git push origin master)"
+      "Bash(git add -A && git commit -m \"fix: 修改tabBar顺序，默认进入摊主管理页面\" && git push origin master)",
+      "Bash(git add -A && git commit -m \"feat: 点餐页面添加'我是摊主'按钮快速切换到管理后台\" && git push origin master)"
     ]
   }
 }

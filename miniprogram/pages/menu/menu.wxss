@@ -12,6 +12,19 @@
   text-align: center;
 }
 
+.header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.owner-switch {
+  font-size: 24rpx;
+  background: rgba(255,255,255,0.2);
+  padding: 8rpx 20rpx;
+  border-radius: 30rpx;
+}
+
 .stall-name {
   font-size: 36rpx;
   font-weight: bold;
