@@ -21,16 +21,16 @@
     "backgroundColor": "#ffffff",
     "list": [
       {
+        "pagePath": "pages/stall/index",
+        "text": "管理"
+      },
+      {
         "pagePath": "pages/menu/menu",
         "text": "点餐"
       },
       {
         "pagePath": "pages/order/order",
         "text": "订单"
-      },
-      {
-        "pagePath": "pages/stall/index",
-        "text": "管理"
       }
     ]
   }
