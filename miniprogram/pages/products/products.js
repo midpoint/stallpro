@@ -71,6 +71,9 @@ Page({
     this.setData({ showModal: false });
   },
 
+  // 阻止冒泡
+  stopPropagation() {},
+
   // 输入名称
   inputName(e) {
     this.setData({ 'formData.name': e.detail.value });

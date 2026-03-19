@@ -41,7 +41,7 @@
 
   <!-- 购物车弹窗 -->
   <view class="cart-overlay {{showCart ? 'show' : ''}}" bindtap="hideCartPanel">
-    <view class="cart-panel" catchtap="true">
+    <view class="cart-panel" catchtap="stopPropagation">
       <view class="cart-header">
         <view class="cart-title">购物车</view>
         <view class="clear-btn" bindtap="clearCart">清空</view>

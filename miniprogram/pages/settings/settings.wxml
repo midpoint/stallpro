@@ -71,7 +71,7 @@
 
   <!-- 编辑弹窗 -->
   <view class="modal {{showModal ? 'show' : ''}}" bindtap="hideModal">
-    <view class="modal-content" catchtap="true">
+    <view class="modal-content" catchtap="stopPropagation">
       <view class="modal-header">
         <view class="modal-title">{{modalTitle}}</view>
         <view class="modal-close" bindtap="hideModal">✕</view>

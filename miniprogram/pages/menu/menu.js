@@ -123,6 +123,9 @@ Page({
     this.setData({ showCart: false });
   },
 
+  // 阻止冒泡
+  stopPropagation() {},
+
   // 提交订单（创建订单）
   checkout() {
     if (this.data.cart.length === 0) return;

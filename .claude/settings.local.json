@@ -61,7 +61,8 @@
       "Bash(git add -A && git commit -m \"feat: 新增商品管理和店铺设置页面\n\n- 新增商品管理页面（pages/products）\n  - 查看商品列表和统计\n  - 添加/编辑/删除商品\n  - 上架/下架商品\n  \n- 新增店铺设置页面（pages/settings）\n  - 店铺名称和公告设置\n  - 取餐号前缀设置\n  - 订单提醒、自动接单开关\n  - 收款方式设置\n  - 夜间模式\n\n- 更新app.json和摊主页面跳转\n\nCo-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>\n\" && git push origin master)",
       "Bash(cd /home/mj/aicode/stallpro/server && npm install mongoose --save 2>&1 | tail -5)",
       "Bash(git add -A && git commit -m \"feat: 添加MongoDB数据库支持\n\n- 添加mongoose依赖\n- 创建db.js数据库连接模块\n- 创建models.js数据模型（User、Stall、Product、Order）\n- 更新vercel-api.js使用MongoDB\n- 支持免费MongoDB Atlas部署\n\nCo-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>\n\" && git push origin master)",
-      "Bash(git add -A && git commit -m \"fix: 改进MongoDB连接错误处理\" && git push origin master)"
+      "Bash(git add -A && git commit -m \"fix: 改进MongoDB连接错误处理\" && git push origin master)",
+      "Bash(git add -A && git commit -m \"fix: 修复小程序catchtap事件处理错误\" && git push origin master)"
     ]
   }
 }

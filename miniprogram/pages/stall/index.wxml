@@ -137,7 +137,7 @@
 
   <!-- 二维码弹窗 -->
   <view class="qrcode-modal {{showQrcodeModal ? 'show' : ''}}" bindtap="hideQrcode">
-    <view class="qrcode-content" catchtap="true">
+    <view class="qrcode-content" catchtap="stopPropagation">
       <view class="qrcode-title">扫码点餐</view>
       <view class="qrcode-image">
         <image src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://stallpro.vercel.app/menu?stallId={{stallId}}" />

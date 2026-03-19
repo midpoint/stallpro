@@ -138,6 +138,9 @@ Page({
     this.setData({ showQrcodeModal: false });
   },
 
+  // 阻止冒泡
+  stopPropagation() {},
+
   // 去商品管理
   goToProducts() {
     wx.navigateTo({ url: '/pages/products/products' });

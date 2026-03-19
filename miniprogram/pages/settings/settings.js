@@ -82,6 +82,9 @@ Page({
     this.setData({ showModal: false });
   },
 
+  // 阻止冒泡
+  stopPropagation() {},
+
   // 输入弹窗值
   inputModalValue(e) {
     this.setData({ modalValue: e.detail.value });

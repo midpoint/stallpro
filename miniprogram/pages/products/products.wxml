@@ -56,7 +56,7 @@
 
   <!-- 添加/编辑弹窗 -->
   <view class="modal {{showModal ? 'show' : ''}}" bindtap="hideModal">
-    <view class="modal-content" catchtap="true">
+    <view class="modal-content" catchtap="stopPropagation">
       <view class="modal-header">
         <view class="modal-title">{{isEdit ? '编辑商品' : '添加商品'}}</view>
         <view class="modal-close" bindtap="hideModal">✕</view>
