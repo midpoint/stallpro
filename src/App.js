@@ -10,6 +10,18 @@ const LoginPage = ({ onLogin }) => {
   const [loading, setLoading] = useState(false);
   const [nickname, setNickname] = useState('');
 
+  // 测试登录 - 直接使用mock数据，不调用后端API
+  const handleTestLogin = () => {
+    const testUser = {
+      id: 'test_user',
+      nickname: '测试摊主',
+      stallId: 'stall1'
+    };
+    localStorage.setItem('stall_token', 'test_token');
+    localStorage.setItem('stall_user', JSON.stringify(testUser));
+    onLogin(testUser);
+  };
+
   const handleLogin = async () => {
     if (!nickname.trim()) {
       alert('请输入昵称');
@@ -60,6 +72,10 @@ const LoginPage = ({ onLogin }) => {
           />
           <button className="btn btn-primary btn-block" onClick={handleLogin} disabled={loading}>
             {loading ? '登录中...' : '登录'}
+          </button>
+
+          <button className="btn btn-outline btn-block btn-test" onClick={handleTestLogin}>
+            测试登录（不调用后端）
           </button>
         </div>
 
@@ -230,6 +246,14 @@ function App() {
 
   // 从API加载店铺数据
   const loadStallData = async (stallId) => {
+    // 测试模式：使用mock数据
+    if (localStorage.getItem('stall_token') === 'test_token') {
+      setStallInfoData(stallInfo);
+      setProductsList(products);
+      setOrders(initialOrders);
+      return;
+    }
+
     try {
       // 加载店铺信息
       const stallRes = await fetch(`${API_BASE}/stall/${stallId}`);

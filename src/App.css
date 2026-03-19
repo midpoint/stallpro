@@ -60,6 +60,17 @@
   color: var(--text-secondary);
 }
 
+.btn-test {
+  margin-top: 10px;
+  background: #f0f0f0;
+  color: #666;
+  border-color: #e0e0e0;
+}
+
+.btn-test:hover {
+  background: #e0e0e0;
+}
+
 /* App容器 */
 .app {
   min-height: 100vh;
