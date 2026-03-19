@@ -1,0 +1,95 @@
+<!--pages/settings/settings.wxml-->
+<view class="container">
+  <!-- 店铺信息 -->
+  <view class="section">
+    <view class="section-title">店铺信息</view>
+    <view class="settings-list">
+      <view class="setting-item" bindtap="editName">
+        <text class="setting-label">店铺名称</text>
+        <view class="setting-value">{{stall.name}}</view>
+      </view>
+      <view class="setting-item" bindtap="editNotice">
+        <text class="setting-label">店铺公告</text>
+        <view class="setting-value">{{stall.notice || '未设置'}}</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 订单设置 -->
+  <view class="section">
+    <view class="section-title">订单设置</view>
+    <view class="settings-list">
+      <view class="setting-item" bindtap="editPrefix">
+        <text class="setting-label">取餐号前缀</text>
+        <view class="setting-value">{{stall.settings.orderPrefix || 'A'}}</view>
+      </view>
+      <view class="setting-item">
+        <text class="setting-label">新订单提醒</text>
+        <switch checked="{{settings.newOrderNotify}}" bindchange="toggleNotify" color="#FF6B35"/>
+      </view>
+      <view class="setting-item">
+        <text class="setting-label">自动接单</text>
+        <switch checked="{{settings.autoAccept}}" bindchange="toggleAutoAccept" color="#FF6B35"/>
+      </view>
+    </view>
+  </view>
+
+  <!-- 收款设置 -->
+  <view class="section">
+    <view class="section-title">收款设置</view>
+    <view class="settings-list">
+      <view class="setting-item">
+        <text class="setting-label">微信支付</text>
+        <switch checked="{{settings.wechatPay}}" bindchange="toggleWechatPay" color="#FF6B35"/>
+      </view>
+      <view class="setting-item">
+        <text class="setting-label">支付宝</text>
+        <switch checked="{{settings.alipay}}" bindchange="toggleAlipay" color="#FF6B35"/>
+      </view>
+    </view>
+  </view>
+
+  <!-- 其他设置 -->
+  <view class="section">
+    <view class="section-title">其他</view>
+    <view class="settings-list">
+      <view class="setting-item">
+        <text class="setting-label">夜间模式</text>
+        <switch checked="{{settings.nightMode}}" bindchange="toggleNightMode" color="#FF6B35"/>
+      </view>
+      <view class="setting-item" bindtap="showAbout">
+        <text class="setting-label">关于</text>
+        <view class="setting-arrow">v1.0.0</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 底部按钮 -->
+  <view class="bottom-btns">
+    <button class="btn-save" bindtap="saveSettings">保存设置</button>
+  </view>
+
+  <!-- 编辑弹窗 -->
+  <view class="modal {{showModal ? 'show' : ''}}" bindtap="hideModal">
+    <view class="modal-content" catchtap="true">
+      <view class="modal-header">
+        <view class="modal-title">{{modalTitle}}</view>
+        <view class="modal-close" bindtap="hideModal">✕</view>
+      </view>
+
+      <view class="modal-body">
+        <input
+          class="form-input"
+          placeholder="请输入"
+          value="{{modalValue}}"
+          bindinput="inputModalValue"
+        />
+      </view>
+
+      <view class="modal-footer">
+        <button class="btn-cancel" bindtap="hideModal">取消</button>
+        <button class="btn-confirm" bindtap="confirmModal">确定</button>
+      </view>
+    </view>
+  </view>
+</view>

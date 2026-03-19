@@ -140,12 +140,12 @@ Page({
 
   // 去商品管理
   goToProducts() {
-    wx.showToast({ title: '商品管理功能开发中', icon: 'none' });
+    wx.navigateTo({ url: '/pages/products/products' });
   },
 
   // 去设置
   goToSettings() {
-    wx.showToast({ title: '设置功能开发中', icon: 'none' });
+    wx.navigateTo({ url: '/pages/settings/settings' });
   },
 
   // 测试订单

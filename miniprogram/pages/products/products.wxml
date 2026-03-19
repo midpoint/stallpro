@@ -1,0 +1,105 @@
+<!--pages/products/products.wxml-->
+<view class="container">
+  <!-- 统计 -->
+  <view class="stats-bar">
+    <view class="stat-item">
+      <text class="stat-num">{{products.length}}</text>
+      <text class="stat-label">全部商品</text>
+    </view>
+    <view class="stat-item">
+      <text class="stat-num">{{activeCount}}</text>
+      <text class="stat-label">在售</text>
+    </view>
+    <view class="stat-item">
+      <text class="stat-num">{{inactiveCount}}</text>
+      <text class="stat-label">已下架</text>
+    </view>
+  </view>
+
+  <!-- 商品列表 -->
+  <view class="product-list">
+    <block wx:for="{{products}}" wx:key="id">
+      <view class="product-card {{item.status === 'inactive' ? 'inactive' : ''}}">
+        <view class="product-icon">{{item.icon}}</view>
+        <view class="product-info">
+          <view class="product-name">{{item.name}}</view>
+          <view class="product-price">¥{{item.price}}</view>
+          <view class="product-category">{{item.category}}</view>
+        </view>
+        <view class="product-actions">
+          <view class="status-badge {{item.status}}">
+            {{item.status === 'active' ? '在售' : '已下架'}}
+          </view>
+          <view class="action-btns">
+            <view class="action-btn" bindtap="editProduct" data-id="{{item.id}}">编辑</view>
+            <view class="action-btn" bindtap="toggleStatus" data-id="{{item.id}}">
+              {{item.status === 'active' ? '下架' : '上架'}}
+            </view>
+            <view class="action-btn delete" bindtap="deleteProduct" data-id="{{item.id}}">删除</view>
+          </view>
+        </view>
+      </view>
+    </block>
+  </view>
+
+  <!-- 空状态 -->
+  <view class="empty" wx:if="{{products.length === 0}}">
+    <view class="empty-icon">🍔</view>
+    <view>暂无商品</view>
+    <view class="empty-tip">点击下方按钮添加商品</view>
+  </view>
+
+  <!-- 添加按钮 -->
+  <view class="add-btn" bindtap="showAddModal">
+    <text>+</text>
+  </view>
+
+  <!-- 添加/编辑弹窗 -->
+  <view class="modal {{showModal ? 'show' : ''}}" bindtap="hideModal">
+    <view class="modal-content" catchtap="true">
+      <view class="modal-header">
+        <view class="modal-title">{{isEdit ? '编辑商品' : '添加商品'}}</view>
+        <view class="modal-close" bindtap="hideModal">✕</view>
+      </view>
+
+      <view class="modal-body">
+        <view class="form-item">
+          <text class="form-label">商品名称 *</text>
+          <input class="form-input" placeholder="如：鸡蛋灌饼" value="{{formData.name}}" bindinput="inputName" />
+        </view>
+
+        <view class="form-item">
+          <text class="form-label">价格（元） *</text>
+          <input class="form-input" type="digit" placeholder="如：8" value="{{formData.price}}" bindinput="inputPrice" />
+        </view>
+
+        <view class="form-item">
+          <text class="form-label">分类</text>
+          <picker range="{{categories}}" value="{{categoryIndex}}" bindchange="selectCategory">
+            <view class="form-picker">
+              {{categories[categoryIndex]}}
+            </view>
+          </picker>
+        </view>
+
+        <view class="form-item">
+          <text class="form-label">图标</text>
+          <view class="icon-selector">
+            <view
+              wx:for="{{icons}}"
+              wx:key="*this"
+              class="icon-option {{formData.icon === item ? 'active' : ''}}"
+              bindtap="selectIcon"
+              data-icon="{{item}}"
+            >{{item}}</view>
+          </view>
+        </view>
+      </view>
+
+      <view class="modal-footer">
+        <button class="btn-cancel" bindtap="hideModal">取消</button>
+        <button class="btn-confirm" bindtap="saveProduct">保存</button>
+      </view>
+    </view>
+  </view>
+</view>

@@ -5,6 +5,8 @@
     "pages/order/detail",
     "pages/order/order",
     "pages/stall/index",
+    "pages/products/products",
+    "pages/settings/settings",
     "pages/profile/profile"
   ],
   "window": {
