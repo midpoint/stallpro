@@ -1,16 +1,81 @@
-// Vercel Serverless 入口 - 使用MongoDB
+// Vercel Serverless 入口 - 支持MongoDB和内存数据
 const express = require('express');
 const cors = require('cors');
-const connectDB = require('./db');
-const { User, Stall, Product, Order } = require('./models');
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// 连接数据库
-connectDB();
+// ===== 内存数据存储（备用）=====
+let userCounter = 1;
+let stallCounter = 1;
+let orderCounter = 0;
+
+const mockData = {
+  users: [],
+  stalls: [],
+  products: [],
+  orders: []
+};
+
+// 初始化默认数据
+const initMockData = () => {
+  if (mockData.users.length === 0) {
+    const user = {
+      _id: 'user1',
+      openid: 'test_user_1',
+      nickname: '王师傅',
+      role: 'owner',
+      stallId: 'stall1',
+      createdAt: new Date().toISOString()
+    };
+
+    const stall = {
+      _id: 'stall1',
+      ownerId: 'user1',
+      name: '老王鸡蛋灌饼',
+      notice: '今日特惠：加肠免费！',
+      settings: { orderPrefix: 'A' },
+      status: 'active'
+    };
+
+    const products = [
+      { _id: 'p1', stallId: 'stall1', name: '鸡蛋灌饼', price: 8, category: '主食', status: 'active' },
+      { _id: 'p2', stallId: 'stall1', name: '手抓饼', price: 10, category: '主食', status: 'active' },
+      { _id: 'p3', stallId: 'stall1', name: '烤冷面', price: 8, category: '主食', status: 'active' },
+      { _id: 'p4', stallId: 'stall1', name: '烤肠', price: 2, category: '小吃', status: 'active' }
+    ];
+
+    mockData.users.push(user);
+    mockData.stalls.push(stall);
+    mockData.products.push(...products);
+
+    userCounter = 1;
+    stallCounter = 1;
+    orderCounter = 0;
+
+    console.log('Mock data initialized');
+  }
+};
+
+initMockData();
+
+// ===== MongoDB连接（可选）=====
+let db = null;
+const connectDB = require('./db');
+
+(async () => {
+  try {
+    db = await connectDB();
+    console.log('MongoDB connected');
+  } catch (e) {
+    console.log('Using in-memory data');
+  }
+})();
+
+// 判断是否使用MongoDB
+const useMongoDB = () => db && mongoose && mongoose.connection.readyState === 1;
 
 // 简单的JWT token生成
 const generateToken = (userId) => {
@@ -26,50 +91,14 @@ const verifyToken = (token) => {
   }
 };
 
-// 初始化默认数据（如果没有数据）
-const initDefaultData = async () => {
-  try {
-    // 检查mongoose是否连接成功
-    if (mongoose.connection.readyState !== 1) {
-      console.log('MongoDB not connected, skipping initDefaultData');
-      return;
-    }
-
-    const userCount = await User.countDocuments();
-    if (userCount === 0) {
-      // 创建默认用户和摊位
-      const user = await User.create({
-        openid: 'test_user_1',
-        nickname: '王师傅',
-        role: 'owner'
-      });
-
-      const stall = await Stall.create({
-        ownerId: user._id,
-        name: '老王鸡蛋灌饼',
-        notice: '今日特惠：加肠免费！',
-        settings: { orderPrefix: 'A' },
-        status: 'active'
-      });
-
-      await User.findByIdAndUpdate(user._id, { stallId: stall._id });
-
-      // 创建默认商品
-      await Product.create([
-        { stallId: stall._id, name: '鸡蛋灌饼', price: 8, category: '主食', status: 'active' },
-        { stallId: stall._id, name: '手抓饼', price: 10, category: '主食', status: 'active' },
-        { stallId: stall._id, name: '烤冷面', price: 8, category: '主食', status: 'active' },
-        { stallId: stall._id, name: '烤肠', price: 2, category: '小吃', status: 'active' }
-      ]);
-
-      console.log('Default data initialized');
-    }
-  } catch (error) {
-    console.error('initDefaultData error:', error.message);
-  }
+// 生成订单号
+const generateOrderNumber = (prefix = 'A') => {
+  orderCounter++;
+  return `${prefix}${orderCounter.toString().padStart(2, '0')}`;
 };
 
-// API 路由
+// ===== API路由 =====
+
 app.get('/api', (req, res) => {
   res.json({ status: 'ok', message: '摆摊666 API', version: '2.0.0' });
 });
@@ -80,66 +109,70 @@ app.get('/api/health', (req, res) => {
 
 // ===== 认证API =====
 
-// 微信登录
-app.post('/api/auth/login', async (req, res) => {
+// 登录
+app.post('/api/auth/login', (req, res) => {
   const { code, userInfo, openid } = req.body;
   const userOpenid = openid || `wx_${code || 'demo'}_${Date.now()}`;
 
-  try {
-    let user = await User.findOne({ openid: userOpenid });
+  // 查找或创建用户（内存数据）
+  let user = mockData.users.find(u => u.openid === userOpenid);
 
-    if (!user) {
-      user = await User.create({
-        openid: userOpenid,
-        nickname: userInfo?.nickName || '新用户',
-        avatar: userInfo?.avatarUrl || '',
-        role: 'owner'
-      });
-    }
-
-    // 如果用户没有摊位，自动创建一个
-    if (!user.stallId) {
-      const stall = await Stall.create({
-        ownerId: user._id,
-        name: `${user.nickname || '新店铺'}`,
-        notice: '欢迎光临！',
-        settings: { orderPrefix: 'A' },
-        status: 'active'
-      });
-      await User.findByIdAndUpdate(user._id, { stallId: stall._id });
-      user.stallId = stall._id;
-
-      // 为新摊位创建默认商品
-      await Product.create([
-        { stallId: stall._id, name: '鸡蛋灌饼', price: 8, category: '主食', status: 'active' },
-        { stallId: stall._id, name: '手抓饼', price: 10, category: '主食', status: 'active' },
-        { stallId: stall._id, name: '烤冷面', price: 8, category: '主食', status: 'active' }
-      ]);
-    }
-
-    const token = generateToken(user._id.toString());
-
-    res.json({
-      success: true,
-      data: {
-        token,
-        user: {
-          id: user._id,
-          nickname: user.nickname,
-          avatar: user.avatar,
-          role: user.role,
-          stallId: user.stallId
-        }
-      }
-    });
-  } catch (error) {
-    console.error('Login error:', error);
-    res.json({ success: false, message: '登录失败' });
+  if (!user) {
+    userCounter++;
+    user = {
+      _id: `user${userCounter}`,
+      openid: userOpenid,
+      nickname: userInfo?.nickName || '新用户',
+      avatar: userInfo?.avatarUrl || '',
+      role: 'owner',
+      stallId: null,
+      createdAt: new Date().toISOString()
+    };
+    mockData.users.push(user);
   }
+
+  // 如果用户没有摊位，创建一个
+  if (!user.stallId) {
+    stallCounter++;
+    const stall = {
+      _id: `stall${stallCounter}`,
+      ownerId: user._id,
+      name: `${user.nickname || '新店铺'}`,
+      notice: '欢迎光临！',
+      settings: { orderPrefix: 'A' },
+      status: 'active'
+    };
+    mockData.stalls.push(stall);
+    user.stallId = stall._id;
+
+    // 添加默认商品
+    const defaultProducts = [
+      { _id: `p${stallCounter}1`, stallId: stall._id, name: '鸡蛋灌饼', price: 8, category: '主食', status: 'active' },
+      { _id: `p${stallCounter}2`, stallId: stall._id, name: '手抓饼', price: 10, category: '主食', status: 'active' },
+      { _id: `p${stallCounter}3`, stallId: stall._id, name: '烤冷面', price: 8, category: '主食', status: 'active' }
+    ];
+    mockData.products.push(...defaultProducts);
+  }
+
+  const token = generateToken(user._id);
+
+  res.json({
+    success: true,
+    data: {
+      token,
+      user: {
+        id: user._id,
+        nickname: user.nickname,
+        avatar: user.avatar,
+        role: user.role,
+        stallId: user.stallId
+      }
+    }
+  });
 });
 
-// 获取当前用户信息
-app.get('/api/auth/me', async (req, res) => {
+// 获取当前用户
+app.get('/api/auth/me', (req, res) => {
   const token = req.headers.authorization?.replace('Bearer ', '');
   if (!token) {
     return res.json({ success: false, message: '未登录' });
@@ -150,314 +183,171 @@ app.get('/api/auth/me', async (req, res) => {
     return res.json({ success: false, message: '无效token' });
   }
 
-  try {
-    const user = await User.findById(decoded.userId);
-    if (!user) {
-      return res.json({ success: false, message: '用户不存在' });
-    }
-
-    res.json({
-      success: true,
-      data: {
-        id: user._id,
-        nickname: user.nickname,
-        avatar: user.avatar,
-        role: user.role,
-        stallId: user.stallId
-      }
-    });
-  } catch (error) {
-    res.json({ success: false, message: '获取用户信息失败' });
+  const user = mockData.users.find(u => u._id === decoded.userId);
+  if (!user) {
+    return res.json({ success: false, message: '用户不存在' });
   }
+
+  res.json({
+    success: true,
+    data: {
+      id: user._id,
+      nickname: user.nickname,
+      avatar: user.avatar,
+      role: user.role,
+      stallId: user.stallId
+    }
+  });
 });
 
 // ===== 摊位API =====
 
-// 获取摊位信息
-app.get('/api/stall/:id', async (req, res) => {
-  try {
-    // 支持ObjectId或字符串ID
-    let stall;
-    if (req.params.id.match(/^[0-9a-fA-F]{24}$/)) {
-      stall = await Stall.findById(req.params.id);
-    } else {
-      // 字符串ID查找
-      const stalls = await Stall.find();
-      stall = stalls.find(s => s._id.toString().includes(req.params.id)) || stalls[0];
-    }
-
-    stall ? res.json({ success: true, data: stall }) : res.json({ success: false, message: '不存在' });
-  } catch (error) {
-    res.json({ success: false, message: '获取失败' });
-  }
+app.get('/api/stall/:id', (req, res) => {
+  const stall = mockData.stalls.find(s => s._id === req.params.id || s._id.includes(req.params.id));
+  stall ? res.json({ success: true, data: stall }) : res.json({ success: false, message: '不存在' });
 });
 
-// 获取我的摊位
-app.get('/api/stall/my', async (req, res) => {
+app.get('/api/stall/my', (req, res) => {
   const token = req.headers.authorization?.replace('Bearer ', '');
   const decoded = verifyToken(token);
+  if (!decoded) return res.json({ success: false, message: '请先登录' });
 
-  if (!decoded) {
-    return res.json({ success: false, message: '请先登录' });
-  }
+  const user = mockData.users.find(u => u._id === decoded.userId);
+  if (!user || !user.stallId) return res.json({ success: false, message: '暂无摊位' });
 
-  try {
-    const user = await User.findById(decoded.userId);
-    if (!user || !user.stallId) {
-      return res.json({ success: false, message: '暂无摊位' });
-    }
-
-    const stall = await Stall.findById(user.stallId);
-    res.json({ success: true, data: stall });
-  } catch (error) {
-    res.json({ success: false, message: '获取失败' });
-  }
+  const stall = mockData.stalls.find(s => s._id === user.stallId);
+  res.json({ success: true, data: stall });
 });
 
-// 更新摊位信息
-app.put('/api/stall/:id', async (req, res) => {
-  const token = req.headers.authorization?.replace('Bearer ', '');
-  const decoded = verifyToken(token);
+app.put('/api/stall/:id', (req, res) => {
+  const stall = mockData.stalls.find(s => s._id === req.params.id || s._id.includes(req.params.id));
+  if (!stall) return res.json({ success: false, message: '摊位不存在' });
 
-  if (!decoded) {
-    return res.json({ success: false, message: '请先登录' });
-  }
+  const { name, notice, settings } = req.body;
+  if (name) stall.name = name;
+  if (notice !== undefined) stall.notice = notice;
+  if (settings) stall.settings = { ...stall.settings, ...settings };
 
-  try {
-    let stall;
-    if (req.params.id.match(/^[0-9a-fA-F]{24}$/)) {
-      stall = await Stall.findById(req.params.id);
-    } else {
-      const stalls = await Stall.find();
-      stall = stalls.find(s => s._id.toString().includes(req.params.id)) || stalls[0];
-    }
-
-    if (!stall) {
-      return res.json({ success: false, message: '摊位不存在' });
-    }
-
-    const { name, notice, settings } = req.body;
-    if (name) stall.name = name;
-    if (notice !== undefined) stall.notice = notice;
-    if (settings) stall.settings = { ...stall.settings, ...settings };
-
-    await stall.save();
-    res.json({ success: true, data: stall });
-  } catch (error) {
-    res.json({ success: false, message: '更新失败' });
-  }
+  res.json({ success: true, data: stall });
 });
 
 // ===== 商品API =====
 
-// 获取商品列表
-app.get('/api/product/stall/:stallId', async (req, res) => {
-  try {
-    let stallId = req.params.stallId;
-    let stall;
+app.get('/api/product/stall/:stallId', (req, res) => {
+  const stall = mockData.stalls.find(s => s._id === req.params.stallId || s._id.includes(req.params.stallId));
+  if (!stall) return res.json({ success: true, data: [] });
 
-    if (stallId.match(/^[0-9a-fA-F]{24}$/)) {
-      stall = await Stall.findById(stallId);
-    } else {
-      const stalls = await Stall.find();
-      stall = stalls.find(s => s._id.toString().includes(stallId)) || stalls[0];
-    }
-
-    if (!stall) {
-      return res.json({ success: true, data: [] });
-    }
-
-    const products = await Product.find({ stallId: stall._id, status: 'active' });
-    res.json({ success: true, data: products });
-  } catch (error) {
-    res.json({ success: false, message: '获取失败' });
-  }
+  const products = mockData.products.filter(p => p.stallId === stall._id && p.status === 'active');
+  res.json({ success: true, data: products });
 });
 
 // ===== 订单API =====
 
-// 创建订单
-app.post('/api/order', async (req, res) => {
+app.post('/api/order', (req, res) => {
   const { stallId, items } = req.body;
+  const stall = mockData.stalls.find(s => s._id === stallId || s._id.includes(stallId));
 
-  try {
-    let stall;
-    if (stallId.match(/^[0-9a-fA-F]{24}$/)) {
-      stall = await Stall.findById(stallId);
-    } else {
-      const stalls = await Stall.find();
-      stall = stalls.find(s => s._id.toString().includes(stallId)) || stalls[0];
-    }
-
-    if (!stall) {
-      return res.json({ success: false, message: '摊位不存在' });
-    }
-
-    const totalAmount = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
-
-    // 生成订单号
-    const prefix = stall.settings?.orderPrefix || 'A';
-    const today = new Date();
-    const dateStr = `${today.getMonth() + 1}${today.getDate()}`;
-    const random = Math.floor(Math.random() * 100).toString().padStart(2, '0');
-    const orderNumber = `${prefix}${dateStr}${random}`;
-
-    const order = await Order.create({
-      stallId: stall._id,
-      orderNumber,
+  if (!stall) {
+    // 使用默认摊位
+    const defaultStall = mockData.stalls[0] || { _id: 'stall1', settings: { orderPrefix: 'A' } };
+    const order = {
+      _id: `order_${Date.now()}`,
+      stallId: defaultStall._id,
+      orderNumber: generateOrderNumber(defaultStall.settings?.orderPrefix || 'A'),
       items,
-      totalAmount,
+      totalAmount: items.reduce((sum, item) => sum + item.price * item.quantity, 0),
       status: 'pending',
-      paymentStatus: 'unpaid'
-    });
-
-    res.json({ success: true, data: order });
-  } catch (error) {
-    console.error('Create order error:', error);
-    res.json({ success: false, message: '创建订单失败' });
+      paymentStatus: 'unpaid',
+      createdAt: new Date().toISOString()
+    };
+    mockData.orders.push(order);
+    return res.json({ success: true, data: order });
   }
+
+  const totalAmount = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const order = {
+    _id: `order_${Date.now()}`,
+    stallId: stall._id,
+    orderNumber: generateOrderNumber(stall.settings?.orderPrefix || 'A'),
+    items,
+    totalAmount,
+    status: 'pending',
+    paymentStatus: 'unpaid',
+    createdAt: new Date().toISOString()
+  };
+
+  mockData.orders.push(order);
+  res.json({ success: true, data: order });
 });
 
-// 发起支付
-app.post('/api/order/:id/pay', async (req, res) => {
-  try {
-    const order = await Order.findById(req.params.id);
-    if (!order) {
-      return res.json({ success: false, message: '订单不存在' });
-    }
+app.post('/api/order/:id/pay', (req, res) => {
+  const order = mockData.orders.find(o => o._id === req.params.id);
+  if (!order) return res.json({ success: false, message: '订单不存在' });
+  if (order.paymentStatus === 'paid') return res.json({ success: false, message: '订单已支付' });
 
-    if (order.paymentStatus === 'paid') {
-      return res.json({ success: false, message: '订单已支付' });
-    }
-
-    res.json({
-      success: true,
-      data: {
-        orderId: order._id,
-        totalAmount: order.totalAmount,
-        mockPay: true
-      }
-    });
-  } catch (error) {
-    res.json({ success: false, message: '支付失败' });
-  }
+  res.json({ success: true, data: { orderId: order._id, totalAmount: order.totalAmount, mockPay: true } });
 });
 
-// 支付回调
-app.post('/api/order/:id/payNotify', async (req, res) => {
-  try {
-    const order = await Order.findById(req.params.id);
-    if (order) {
-      order.paymentStatus = 'paid';
-      order.transactionId = req.body.transactionId || `tx_${Date.now()}`;
-      order.paidAt = new Date();
-      await order.save();
-    }
-    res.json({ success: true });
-  } catch (error) {
-    res.json({ success: false });
+app.post('/api/order/:id/payNotify', (req, res) => {
+  const order = mockData.orders.find(o => o._id === req.params.id);
+  if (order) {
+    order.paymentStatus = 'paid';
+    order.transactionId = req.body.transactionId || `tx_${Date.now()}`;
+    order.paidAt = new Date().toISOString();
   }
+  res.json({ success: true });
 });
 
-// 获取订单详情
-app.get('/api/order/:id', async (req, res) => {
-  try {
-    const order = await Order.findById(req.params.id);
-    order ? res.json({ success: true, data: order }) : res.json({ success: false, message: '订单不存在' });
-  } catch (error) {
-    res.json({ success: false, message: '获取失败' });
-  }
+app.get('/api/order/:id', (req, res) => {
+  const order = mockData.orders.find(o => o._id === req.params.id);
+  order ? res.json({ success: true, data: order }) : res.json({ success: false, message: '订单不存在' });
 });
 
-// 获取订单列表
-app.get('/api/order/stall/:stallId', async (req, res) => {
-  try {
-    let stallId = req.params.stallId;
-    let stall;
+app.get('/api/order/stall/:stallId', (req, res) => {
+  const stall = mockData.stalls.find(s => s._id === req.params.stallId || s._id.includes(req.params.stallId));
+  if (!stall) return res.json({ success: true, data: { list: [], total: 0 } });
 
-    if (stallId.match(/^[0-9a-fA-F]{24}$/)) {
-      stall = await Stall.findById(stallId);
-    } else {
-      const stalls = await Stall.find();
-      stall = stalls.find(s => s._id.toString().includes(stallId)) || stalls[0];
-    }
-
-    if (!stall) {
-      return res.json({ success: true, data: { list: [], total: 0 } });
-    }
-
-    const orders = await Order.find({ stallId: stall._id }).sort({ createdAt: -1 });
-    res.json({ success: true, data: { list: orders, total: orders.length } });
-  } catch (error) {
-    res.json({ success: false, message: '获取失败' });
-  }
+  const orders = mockData.orders.filter(o => o.stallId === stall._id).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  res.json({ success: true, data: { list: orders, total: orders.length } });
 });
 
-// 更新订单状态
-app.put('/api/order/:id/status', async (req, res) => {
-  try {
-    const { status } = req.body;
-    const order = await Order.findByIdAndUpdate(req.params.id, { status }, { new: true });
-    order ? res.json({ success: true, data: order }) : res.json({ success: false });
-  } catch (error) {
-    res.json({ success: false });
+app.put('/api/order/:id/status', (req, res) => {
+  const { status } = req.body;
+  const order = mockData.orders.find(o => o._id === req.params.id);
+  if (order) {
+    order.status = status;
+    return res.json({ success: true, data: order });
   }
+  res.json({ success: false });
 });
 
-// 叫号
-app.post('/api/order/:id/call', async (req, res) => {
-  try {
-    const order = await Order.findByIdAndUpdate(
-      req.params.id,
-      { status: 'completed', calledAt: new Date() },
-      { new: true }
-    );
-    order ? res.json({ success: true, data: order }) : res.json({ success: false });
-  } catch (error) {
-    res.json({ success: false });
+app.post('/api/order/:id/call', (req, res) => {
+  const order = mockData.orders.find(o => o._id === req.params.id);
+  if (order) {
+    order.status = 'completed';
+    order.calledAt = new Date().toISOString();
+    return res.json({ success: true, data: order });
   }
+  res.json({ success: false });
 });
 
 // ===== 统计API =====
 
-// 今日统计
-app.get('/api/stats/today/:stallId', async (req, res) => {
-  try {
-    let stallId = req.params.stallId;
-    let stall;
+app.get('/api/stats/today/:stallId', (req, res) => {
+  const stall = mockData.stalls.find(s => s._id === req.params.stallId || s._id.includes(req.params.stallId));
+  if (!stall) return res.json({ success: true, data: { orderCount: 0, todayRevenue: 0, pendingCount: 0 } });
 
-    if (stallId.match(/^[0-9a-fA-F]{24}$/)) {
-      stall = await Stall.findById(stallId);
-    } else {
-      const stalls = await Stall.find();
-      stall = stalls.find(s => s._id.toString().includes(stallId)) || stalls[0];
+  const today = new Date().toISOString().split('T')[0];
+  const orders = mockData.orders.filter(o => o.stallId === stall._id && o.createdAt.startsWith(today));
+
+  res.json({
+    success: true,
+    data: {
+      orderCount: orders.length,
+      todayRevenue: orders.filter(o => o.paymentStatus === 'paid').reduce((s, o) => s + o.totalAmount, 0),
+      pendingCount: orders.filter(o => o.status === 'pending').length
     }
-
-    if (!stall) {
-      return res.json({ success: true, data: { orderCount: 0, todayRevenue: 0, pendingCount: 0 } });
-    }
-
-    const today = new Date();
-    const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-
-    const orders = await Order.find({
-      stallId: stall._id,
-      createdAt: { $gte: startOfDay }
-    });
-
-    const orderCount = orders.length;
-    const todayRevenue = orders
-      .filter(o => o.paymentStatus === 'paid')
-      .reduce((sum, o) => sum + o.totalAmount, 0);
-    const pendingCount = orders.filter(o => o.status === 'pending').length;
-
-    res.json({
-      success: true,
-      data: { orderCount, todayRevenue, pendingCount }
-    });
-  } catch (error) {
-    res.json({ success: false, message: '获取失败' });
-  }
+  });
 });
 
 // Vercel Serverless export
