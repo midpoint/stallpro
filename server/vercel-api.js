@@ -28,37 +28,46 @@ const verifyToken = (token) => {
 
 // 初始化默认数据（如果没有数据）
 const initDefaultData = async () => {
-  const userCount = await User.countDocuments();
-  if (userCount === 0) {
-    // 创建默认用户和摊位
-    const user = await User.create({
-      openid: 'test_user_1',
-      nickname: '王师傅',
-      role: 'owner'
-    });
+  try {
+    // 检查mongoose是否连接成功
+    if (mongoose.connection.readyState !== 1) {
+      console.log('MongoDB not connected, skipping initDefaultData');
+      return;
+    }
 
-    const stall = await Stall.create({
-      ownerId: user._id,
-      name: '老王鸡蛋灌饼',
-      notice: '今日特惠：加肠免费！',
-      settings: { orderPrefix: 'A' },
-      status: 'active'
-    });
+    const userCount = await User.countDocuments();
+    if (userCount === 0) {
+      // 创建默认用户和摊位
+      const user = await User.create({
+        openid: 'test_user_1',
+        nickname: '王师傅',
+        role: 'owner'
+      });
 
-    await User.findByIdAndUpdate(user._id, { stallId: stall._id });
+      const stall = await Stall.create({
+        ownerId: user._id,
+        name: '老王鸡蛋灌饼',
+        notice: '今日特惠：加肠免费！',
+        settings: { orderPrefix: 'A' },
+        status: 'active'
+      });
 
-    // 创建默认商品
-    await Product.create([
-      { stallId: stall._id, name: '鸡蛋灌饼', price: 8, category: '主食', status: 'active' },
-      { stallId: stall._id, name: '手抓饼', price: 10, category: '主食', status: 'active' },
-      { stallId: stall._id, name: '烤冷面', price: 8, category: '主食', status: 'active' },
-      { stallId: stall._id, name: '烤肠', price: 2, category: '小吃', status: 'active' }
-    ]);
+      await User.findByIdAndUpdate(user._id, { stallId: stall._id });
 
-    console.log('Default data initialized');
+      // 创建默认商品
+      await Product.create([
+        { stallId: stall._id, name: '鸡蛋灌饼', price: 8, category: '主食', status: 'active' },
+        { stallId: stall._id, name: '手抓饼', price: 10, category: '主食', status: 'active' },
+        { stallId: stall._id, name: '烤冷面', price: 8, category: '主食', status: 'active' },
+        { stallId: stall._id, name: '烤肠', price: 2, category: '小吃', status: 'active' }
+      ]);
+
+      console.log('Default data initialized');
+    }
+  } catch (error) {
+    console.error('initDefaultData error:', error.message);
   }
 };
-initDefaultData();
 
 // API 路由
 app.get('/api', (req, res) => {
