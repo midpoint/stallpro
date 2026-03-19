@@ -58,7 +58,9 @@
       "Bash(git add -A && git commit -m \"fix: 修改tabBar顺序，默认进入摊主管理页面\" && git push origin master)",
       "Bash(git add -A && git commit -m \"feat: 点餐页面添加'我是摊主'按钮快速切换到管理后台\" && git push origin master)",
       "Bash(git add -A && git commit -m \"feat: 完善小程序管理页面功能\n\n- 添加店铺头部信息（名称、公告）\n- 添加快捷操作入口（商品管理、店铺设置、测试订单、测试叫号）\n- 订单分组显示（待接单、制作中、已完成）\n- 添加二维码弹窗（扫码点餐）\n- 优化订单卡片样式和空状态显示\n\nCo-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>\n\" && git push origin master)",
-      "Bash(git add -A && git commit -m \"feat: 新增商品管理和店铺设置页面\n\n- 新增商品管理页面（pages/products）\n  - 查看商品列表和统计\n  - 添加/编辑/删除商品\n  - 上架/下架商品\n  \n- 新增店铺设置页面（pages/settings）\n  - 店铺名称和公告设置\n  - 取餐号前缀设置\n  - 订单提醒、自动接单开关\n  - 收款方式设置\n  - 夜间模式\n\n- 更新app.json和摊主页面跳转\n\nCo-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>\n\" && git push origin master)"
+      "Bash(git add -A && git commit -m \"feat: 新增商品管理和店铺设置页面\n\n- 新增商品管理页面（pages/products）\n  - 查看商品列表和统计\n  - 添加/编辑/删除商品\n  - 上架/下架商品\n  \n- 新增店铺设置页面（pages/settings）\n  - 店铺名称和公告设置\n  - 取餐号前缀设置\n  - 订单提醒、自动接单开关\n  - 收款方式设置\n  - 夜间模式\n\n- 更新app.json和摊主页面跳转\n\nCo-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>\n\" && git push origin master)",
+      "Bash(cd /home/mj/aicode/stallpro/server && npm install mongoose --save 2>&1 | tail -5)",
+      "Bash(git add -A && git commit -m \"feat: 添加MongoDB数据库支持\n\n- 添加mongoose依赖\n- 创建db.js数据库连接模块\n- 创建models.js数据模型（User、Stall、Product、Order）\n- 更新vercel-api.js使用MongoDB\n- 支持免费MongoDB Atlas部署\n\nCo-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>\n\" && git push origin master)"
     ]
   }
 }
