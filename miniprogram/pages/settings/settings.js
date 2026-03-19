@@ -27,13 +27,19 @@ Page({
   },
 
   loadSettings() {
-    let stallId = app.globalData.stallId || 'stall1';
+    // 从本地存储获取stallId
+    const userInfo = wx.getStorageSync('userInfo');
+    let stallId = app.globalData.stallId || (userInfo && userInfo.stallId) || 'stall1';
     stallId = stallId.toString().trim();
+
+    console.log('Settings load stallId:', stallId);
+
     const that = this;
 
     // 优先从本地存储加载店铺信息
     const localStallInfo = wx.getStorageSync('stall_info');
     if (localStallInfo) {
+      console.log('Using local stall info:', localStallInfo);
       that.setData({ stall: localStallInfo });
     }
 
@@ -47,11 +53,15 @@ Page({
     wx.request({
       url: `${API_BASE}/stall/${stallId}`,
       success(res) {
+        console.log('API stall response:', res.data);
         if (res.data.success && res.data.data) {
           that.setData({ stall: res.data.data });
           // 更新本地存储
           wx.setStorageSync('stall_info', res.data.data);
         }
+      },
+      fail(err) {
+        console.log('API stall error:', err);
       }
     });
   },
@@ -165,17 +175,23 @@ Page({
 
     wx.showToast({ title: '保存成功', icon: 'success' });
 
-    // 尝试发送到后端（不阻塞UI）
-    try {
-      let stallId = app.globalData.stallId || 'stall1';
-      stallId = stallId.toString().trim();
+    // 发送到后端
+    const userInfo = wx.getStorageSync('userInfo');
+    let stallId = app.globalData.stallId || (userInfo && userInfo.stallId) || 'stall1';
+    stallId = stallId.toString().trim();
 
-      wx.request({
-        url: `${API_BASE}/stall/${stallId}`,
-        method: 'PUT',
-        data: stallInfo,
-        fail: function() {}
-      });
-    } catch(e) {}
+    console.log('Saving with stallId:', stallId);
+
+    wx.request({
+      url: `${API_BASE}/stall/${stallId}`,
+      method: 'PUT',
+      data: stallInfo,
+      success(res) {
+        console.log('Save response:', res.data);
+      },
+      fail(err) {
+        console.log('Save error:', err);
+      }
+    });
   }
 });
