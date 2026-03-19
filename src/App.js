@@ -710,11 +710,16 @@ function App() {
               <div className="settings-item" onClick={() => setShowSettingsModal('shop')}>
                 <span className="settings-icon">🏪</span>
                 <span>店铺信息</span>
-                <div className="settings-value">{stallInfo.name}</div>
+                <div className="settings-value">{stallInfoData.name}</div>
               </div>
               <div className="settings-item" onClick={() => setShowSettingsModal('notice')}>
                 <span className="settings-icon">📢</span>
                 <span>店铺公告</span>
+                <span className="settings-arrow">></span>
+              </div>
+              <div className="settings-item" onClick={() => setShowSettingsModal('hours')}>
+                <span className="settings-icon">🕐</span>
+                <span>营业时间</span>
                 <span className="settings-arrow">></span>
               </div>
               <div className="settings-item" onClick={() => setShowSettingsModal('orderQrcode')}>
@@ -955,6 +960,7 @@ function App() {
                     <div className="modal-title">
                       {showSettingsModal === 'shop' && '店铺信息'}
                       {showSettingsModal === 'notice' && '店铺公告'}
+                      {showSettingsModal === 'hours' && '营业时间'}
                       {showSettingsModal === 'orderQrcode' && '点餐二维码'}
                       {showSettingsModal === 'qrcode' && '收款二维码'}
                       {showSettingsModal === 'sound' && '播报声音'}
@@ -1051,11 +1057,11 @@ function App() {
                     {showSettingsModal === 'shop' && (
                       <div className="form-group">
                         <label>店铺名称</label>
-                        <input type="text" defaultValue={stallInfo.name} className="form-input" />
-                        <label>店主姓名</label>
-                        <input type="text" defaultValue={stallInfo.ownerName} className="form-input" />
-                        <label>联系电话</label>
-                        <input type="tel" placeholder="请输入手机号" className="form-input" />
+                        <input type="text" defaultValue={stallInfoData.name} className="form-input" id="shopNameInput" />
+                        <label>店铺公告</label>
+                        <input type="text" defaultValue={stallInfoData.notice} className="form-input" id="shopNoticeInput" placeholder="如：今日特惠，加肠免费" />
+                        <label>取餐号前缀</label>
+                        <input type="text" defaultValue={settings.orderPrefix} className="form-input" id="shopPrefixInput" placeholder="如：A、B、1" />
                       </div>
                     )}
 
@@ -1063,11 +1069,51 @@ function App() {
                       <div className="form-group">
                         <label>公告内容</label>
                         <textarea
-                          defaultValue={stallInfo.notice}
+                          defaultValue={stallInfoData.notice}
                           className="form-input"
                           rows={3}
-                          placeholder="输入店铺公告内容"
+                          placeholder="输入店铺公告内容，如：今日特惠活动"
                         />
+                        <p className="form-tip">顾客在点餐页面会看到此公告</p>
+                      </div>
+                    )}
+
+                    {showSettingsModal === 'hours' && (
+                      <div className="hours-settings">
+                        <div className="hours-day">
+                          <div className="day-header">
+                            <span className="day-name">周一至周五</span>
+                            <label className="switch">
+                              <input type="checkbox" defaultChecked />
+                              <span className="slider"></span>
+                            </label>
+                          </div>
+                          <div className="day-time">
+                            <input type="time" className="time-input" defaultValue="06:00" />
+                            <span>至</span>
+                            <input type="time" className="time-input" defaultValue="22:00" />
+                          </div>
+                        </div>
+
+                        <div className="hours-day">
+                          <div className="day-header">
+                            <span className="day-name">周六日</span>
+                            <label className="switch">
+                              <input type="checkbox" defaultChecked />
+                              <span className="slider"></span>
+                            </label>
+                          </div>
+                          <div className="day-time">
+                            <input type="time" className="time-input" defaultValue="07:00" />
+                            <span>至</span>
+                            <input type="time" className="time-input" defaultValue="23:00" />
+                          </div>
+                        </div>
+
+                        <div className="hours-status">
+                          <span className="status-label">当前状态：</span>
+                          <span className="status-value status-open">营业中</span>
+                        </div>
                       </div>
                     )}
 
