@@ -52,7 +52,9 @@
       "Bash(git add -A && git commit -m \"$\\(cat <<'EOF'\n实现多摊主数据隔离\n\n- 添加摊主登录功能，每个摊主独立账户\n- 登录后自动加载自己店铺的商品和订单\n- 点餐二维码使用摊主自己的stallId\n- 添加退出登录功能\n- 摊主只能看到自己店铺的数据\n\nCo-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>\nEOF\n\\)\")",
       "Bash(npm run build 2>&1 | tail -20)",
       "Bash(git add -A && git commit -m \"$\\(cat <<'EOF'\n完善后台管理设置页面\n\n- 修复店铺名称显示（使用真实数据）\n- 添加营业时间设置功能\n- 完善店铺信息编辑（名称、公告、前缀）\n- 添加保存功能到设置弹窗\n\nCo-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>\nEOF\n\\)\")",
-      "Bash(git add -A && git commit -m \"$\\(cat <<'EOF'\n添加测试登录功能，方便调试\n\n- 添加测试登录按钮，直接使用mock数据\n- 无需调用后端API即可进入后台\n- 便于在开发调试阶段使用\n\nCo-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>\nEOF\n\\)\" && git push origin master)"
+      "Bash(git add -A && git commit -m \"$\\(cat <<'EOF'\n添加测试登录功能，方便调试\n\n- 添加测试登录按钮，直接使用mock数据\n- 无需调用后端API即可进入后台\n- 便于在开发调试阶段使用\n\nCo-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>\nEOF\n\\)\" && git push origin master)",
+      "Bash(npm run build 2>&1 | tail -10)",
+      "Bash(git add -A && git commit -m \"fix: 修复登录按钮样式\" && git push origin master)"
     ]
   }
 }
