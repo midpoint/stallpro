@@ -1,15 +1,20 @@
 <!--pages/order/order.wxml-->
 <view class="container">
-  <view class="header">
-    <view class="title">我的订单</view>
+  <!-- Tab切换（摊主可见） -->
+  <view class="tab-bar" wx:if="{{isOwner}}">
+    <view class="tab {{tab === 'owner' ? 'active' : ''}}" bindtap="switchTab" data-tab="owner">管理订单</view>
+    <view class="tab {{tab === 'customer' ? 'active' : ''}}" bindtap="switchTab" data-tab="customer">我的订单</view>
   </view>
 
-  <view class="order-list">
+  <!-- 摊主管理模式 -->
+  <view wx:if="{{tab === 'owner' && isOwner}}">
     <block wx:for="{{orders}}" wx:key="id">
-      <view class="order-item">
+      <view class="order-card {{item.status}}">
         <view class="order-header">
           <view class="order-number">{{item.orderNumber}}</view>
-          <view class="order-status">{{item.status === 'pending' ? '待接单' : item.status === 'cooking' ? '制作中' : item.status === 'completed' ? '已完成' : '已取餐'}}</view>
+          <view class="order-status {{item.status}}">
+            {{item.status === 'pending' ? '待接单' : item.status === 'cooking' ? '制作中' : '已完成'}}
+          </view>
         </view>
         <view class="order-items">
           <block wx:for="{{item.items}}" wx:for-item="food" wx:key="name">
@@ -17,14 +22,25 @@
           </block>
         </view>
         <view class="order-footer">
-          <view class="order-time">{{item.createdAt}}</view>
           <view class="order-amount">¥{{item.totalAmount}}</view>
+          <view class="order-actions">
+            <button wx:if="{{item.status === 'pending'}}" size="mini" type="primary" bindtap="acceptOrder" data-id="{{item.id}}">接单</button>
+            <button wx:if="{{item.status === 'cooking'}}" size="mini" type="success" bindtap="completeOrder" data-id="{{item.id}}">完成叫号</button>
+          </view>
         </view>
       </view>
     </block>
   </view>
 
-  <view class="empty" wx:if="{{orders.length === 0}}">
+  <!-- 顾客模式 -->
+  <view wx:if="{{!isOwner || tab === 'customer'}}">
+    <view class="customer-tip">
+      <view>📱 扫码点餐更方便</view>
+      <view class="tip-text">请扫描摊位二维码下单</view>
+    </view>
+  </view>
+
+  <view class="empty" wx:if="{{orders.length === 0 && tab === 'owner'}}">
     <view>暂无订单</view>
   </view>
 </view>

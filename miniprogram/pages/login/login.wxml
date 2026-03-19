@@ -4,11 +4,24 @@
   <view class="title">摆摊666</view>
   <view class="subtitle">边做边卖 · 边接单 · 边收款</view>
 
-  <button class="login-btn" bindtap="handleLogin">
-    <text>微信授权登录</text>
-  </button>
+  <!-- 摊主登录区域 -->
+  <view class="owner-section">
+    <view class="section-title">我是摊主</view>
+    <button class="login-btn owner-btn" bindtap="handleOwnerLogin">
+      <text>微信授权登录管理店铺</text>
+    </button>
+    <view class="tips">登录后可管理订单、添加商品、查看统计</view>
+  </view>
 
-  <view class="tips">
-    登录后自动创建专属摊位
+  <!-- 顾客提示 -->
+  <view class="customer-section">
+    <view class="section-title">我是顾客</view>
+    <view class="customer-tip">
+      <view>📱 扫码直接点餐</view>
+      <view class="tip-text">无需登录，扫描摊位二维码即可点餐</view>
+    </view>
+    <button class="guest-btn" bindtap="goToMenu">
+      扫码点餐（模拟）
+    </button>
   </view>
 </view>

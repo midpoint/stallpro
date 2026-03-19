@@ -1,0 +1,37 @@
+<!--pages/order/detail.wxml-->
+<view class="container">
+  <!-- 订单状态 -->
+  <view class="status-card">
+    <view class="status-icon">{{statusIcon}}</view>
+    <view class="status-text">{{statusText}}</view>
+    <view class="order-number">取餐号：{{order.orderNumber}}</view>
+  </view>
+
+  <!-- 订单详情 -->
+  <view class="order-card">
+    <view class="card-title">订单详情</view>
+    <view class="order-items">
+      <block wx:for="{{order.items}}" wx:key="id">
+        <view class="item">
+          <view class="item-name">{{item.name}}</view>
+          <view class="item-qty">x{{item.quantity}}</view>
+          <view class="item-price">¥{{item.price * item.quantity}}</view>
+        </view>
+      </block>
+    </view>
+    <view class="order-total">
+      <text>实付</text>
+      <text class="total-price">¥{{order.totalAmount}}</text>
+    </view>
+  </view>
+
+  <!-- 提示 -->
+  <view class="tips" wx:if="{{order.status === 'pending' || order.status === 'cooking'}}">
+    <view>🔔 等待商家接单制作中...</view>
+  </view>
+
+  <!-- 底部按钮 -->
+  <view class="bottom-bar">
+    <button class="btn-primary" bindtap="refreshOrder">刷新状态</button>
+  </view>
+</view>

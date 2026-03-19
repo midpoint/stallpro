@@ -1,4 +1,4 @@
-// pages/menu/menu.js
+// pages/menu/menu.js - 顾客点餐页（无需登录）
 const app = getApp();
 const API_BASE = 'https://stallpro.vercel.app/api';
 
@@ -9,45 +9,29 @@ Page({
     cart: [],
     cartCount: 0,
     cartTotal: 0,
-    isLoggedIn: false
+    orderNumber: null  // 取餐号
   },
 
   onLoad(options) {
-    // 检查登录状态
-    this.checkLogin();
-
-    // 从分享链接获取摊位ID
-    if (options.stallId) {
-      app.globalData.stallId = options.stallId;
-    }
+    // 从URL参数获取摊位ID（扫码进入）
+    const stallId = options.stallId || options.scene || 'stall1';
+    app.globalData.stallId = stallId;
+    this.loadData(stallId);
   },
 
   onShow() {
-    // 每次显示时检查登录并刷新数据
-    if (app.isLoggedIn()) {
-      this.loadData();
-    }
-  },
-
-  checkLogin() {
-    if (!app.isLoggedIn()) {
-      // 未登录，跳转到登录页
-      wx.redirectTo({ url: '/pages/login/login' });
-      return;
-    }
-    this.setData({ isLoggedIn: true });
-    this.loadData();
-  },
-
-  loadData() {
     const stallId = app.globalData.stallId || 'stall1';
+    this.loadData(stallId);
+  },
 
+  loadData(stallId) {
     // 加载摊位信息
     wx.request({
       url: `${API_BASE}/stall/${stallId}`,
       success: (res) => {
         if (res.data.success) {
           this.setData({ stall: res.data.data });
+          wx.setNavigationBarTitle({ title: res.data.data.name || '点餐' });
         }
       }
     });
@@ -86,8 +70,43 @@ Page({
     const cartTotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
     this.setData({ cart, cartCount, cartTotal });
-
     wx.showToast({ title: '已加入', icon: 'success' });
+  },
+
+  // 减少数量
+  reduceCart(e) {
+    const { id } = e.currentTarget.dataset;
+    let cart = [...this.data.cart];
+    const index = cart.findIndex(item => item.id === id);
+
+    if (index > -1) {
+      if (cart[index].quantity > 1) {
+        cart[index].quantity -= 1;
+      } else {
+        cart.splice(index, 1);
+      }
+    }
+
+    const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+    const cartTotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+
+    this.setData({ cart, cartCount, cartTotal });
+  },
+
+  // 增加数量
+  addCart(e) {
+    const { id } = e.currentTarget.dataset;
+    let cart = [...this.data.cart];
+    const index = cart.findIndex(item => item.id === id);
+
+    if (index > -1) {
+      cart[index].quantity += 1;
+    }
+
+    const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+    const cartTotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+
+    this.setData({ cart, cartCount, cartTotal });
   },
 
   checkout() {
@@ -96,7 +115,7 @@ Page({
     const stallId = app.globalData.stallId || 'stall1';
     const that = this;
 
-    wx.showLoading({ title: '提交中...' });
+    wx.showLoading({ title: '提交订单...' });
 
     wx.request({
       url: `${API_BASE}/order`,
@@ -108,8 +127,24 @@ Page({
       success(res) {
         wx.hideLoading();
         if (res.data.success) {
-          wx.showToast({ title: '下单成功!', icon: 'success' });
-          that.setData({ cart: [], cartCount: 0, cartTotal: 0 });
+          const order = res.data.data;
+          that.setData({
+            cart: [],
+            cartCount: 0,
+            cartTotal: 0,
+            orderNumber: order.orderNumber
+          });
+          wx.showModal({
+            title: '下单成功！',
+            content: `取餐号：${order.orderNumber}\n请等待叫号取餐`,
+            showCancel: false,
+            success: () => {
+              // 跳转到订单页面查看状态
+              wx.navigateTo({
+                url: `/pages/order/detail?orderId=${order._id}&stallId=${stallId}`
+              });
+            }
+          });
         } else {
           wx.showToast({ title: res.data.message || '下单失败', icon: 'none' });
         }
@@ -122,7 +157,8 @@ Page({
   },
 
   onPullDownRefresh() {
-    this.loadData();
+    const stallId = app.globalData.stallId || 'stall1';
+    this.loadData(stallId);
     wx.stopPullDownRefresh();
   }
 });

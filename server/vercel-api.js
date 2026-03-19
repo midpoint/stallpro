@@ -234,6 +234,12 @@ app.post('/api/order', (req, res) => {
   res.json({ success: true, data: order });
 });
 
+// 获取订单详情
+app.get('/api/order/:id', (req, res) => {
+  const order = mockData.orders.find(o => o._id === req.params.id);
+  order ? res.json({ success: true, data: order }) : res.json({ success: false, message: '订单不存在' });
+});
+
 // 获取订单列表
 app.get('/api/order/stall/:stallId', (req, res) => {
   const orders = mockData.orders.filter(o => o.stallId === req.params.stallId);

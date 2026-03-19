@@ -8,26 +8,24 @@ Page({
   },
 
   onLoad() {
-    // 检查是否已登录
-    if (app.globalData.token) {
-      this.checkLogin();
+    // 已登录则直接跳转
+    if (app.isLoggedIn()) {
+      wx.switchTab({ url: '/pages/stall/index' });
     }
   },
 
-  handleLogin() {
+  // 摊主登录
+  handleOwnerLogin() {
     if (this.data.loading) return;
     this.setData({ loading: true });
 
     const that = this;
 
-    // 获取用户信息
     wx.getUserProfile({
       desc: '用于完善用户资料',
       success: async (userRes) => {
-        // 尝试登录
         try {
-          // 使用模拟的code（实际需要通过wx.login获取）
-          const code = 'demo_' + Date.now();
+          const code = 'owner_' + Date.now();
 
           wx.request({
             url: `${API_BASE}/auth/login`,
@@ -38,7 +36,6 @@ Page({
             },
             success(res) {
               if (res.data.success) {
-                // 保存登录信息
                 app.globalData.token = res.data.data.token;
                 app.globalData.userInfo = res.data.data.user;
                 app.globalData.stallId = res.data.data.user.stallId;
@@ -48,9 +45,8 @@ Page({
 
                 wx.showToast({ title: '登录成功', icon: 'success' });
 
-                // 跳转到首页
                 setTimeout(() => {
-                  wx.switchTab({ url: '/pages/menu/menu' });
+                  wx.switchTab({ url: '/pages/stall/index' });
                 }, 1000);
               } else {
                 wx.showToast({ title: res.data.message || '登录失败', icon: 'none' });
@@ -70,37 +66,16 @@ Page({
           wx.showToast({ title: '登录失败', icon: 'none' });
         }
       },
-      fail: (err) => {
-        console.log('用户拒绝授权', err);
+      fail: () => {
         that.setData({ loading: false });
-        // 可以使用游客模式继续
-        wx.showToast({ title: '需要授权才能使用', icon: 'none' });
+        wx.showToast({ title: '需要授权才能管理店铺', icon: 'none' });
       }
     });
   },
 
-  // 检查登录状态
-  checkLogin() {
-    const that = this;
-    wx.request({
-      url: `${API_BASE}/auth/me`,
-      header: {
-        'Authorization': `Bearer ${app.globalData.token}`
-      },
-      success(res) {
-        if (res.data.success) {
-          app.globalData.userInfo = res.data.data;
-          app.globalData.stallId = res.data.data.stallId;
-          wx.switchTab({ url: '/pages/menu/menu' });
-        } else {
-          // token失效，清除
-          app.globalData.token = null;
-          wx.removeStorageSync('token');
-        }
-      },
-      fail() {
-        app.globalData.token = null;
-      }
-    });
+  // 顾客直接点餐（模拟扫码）
+  goToMenu() {
+    // 模拟扫码进入，使用默认摊位
+    wx.switchTab({ url: '/pages/menu/menu' });
   }
 });
