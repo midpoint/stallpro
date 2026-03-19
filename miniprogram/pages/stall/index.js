@@ -35,13 +35,15 @@ Page({
       wx.redirectTo({ url: '/pages/login/login' });
       return;
     }
-    const stallId = app.globalData.stallId || 'stall1';
+    let stallId = app.globalData.stallId || 'stall1';
+    stallId = stallId.toString().trim();
     this.setData({ isLoggedIn: true, stallId });
     this.loadData();
   },
 
   loadData() {
-    const stallId = app.globalData.stallId || this.data.stallId || 'stall1';
+    let stallId = app.globalData.stallId || this.data.stallId || 'stall1';
+    stallId = stallId.toString().trim();
     const that = this;
 
     // 加载店铺信息
@@ -154,11 +156,14 @@ Page({
   // 测试订单
   testOrder() {
     const that = this;
+    let stallId = this.data.stallId || 'stall1';
+    stallId = stallId.toString().trim();
+
     wx.request({
       url: `${API_BASE}/order`,
       method: 'POST',
       data: {
-        stallId: this.data.stallId || 'stall1',
+        stallId: stallId,
         items: [{ id: 'p1', name: '鸡蛋灌饼', price: 8, quantity: 1 }]
       },
       success(res) {

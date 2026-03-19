@@ -30,7 +30,8 @@ Page({
   },
 
   loadProducts() {
-    const stallId = app.globalData.stallId || 'stall1';
+    let stallId = app.globalData.stallId || 'stall1';
+    stallId = stallId.toString().trim();
     const that = this;
 
     wx.request({
@@ -128,7 +129,8 @@ Page({
       return;
     }
 
-    const stallId = app.globalData.stallId || 'stall1';
+    let stallId = app.globalData.stallId || 'stall1';
+    stallId = stallId.toString().trim();
 
     // 这里简化处理，实际应该调用后端API
     wx.showLoading({ title: '保存中...' });

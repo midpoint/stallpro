@@ -62,7 +62,8 @@
       "Bash(cd /home/mj/aicode/stallpro/server && npm install mongoose --save 2>&1 | tail -5)",
       "Bash(git add -A && git commit -m \"feat: 添加MongoDB数据库支持\n\n- 添加mongoose依赖\n- 创建db.js数据库连接模块\n- 创建models.js数据模型（User、Stall、Product、Order）\n- 更新vercel-api.js使用MongoDB\n- 支持免费MongoDB Atlas部署\n\nCo-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>\n\" && git push origin master)",
       "Bash(git add -A && git commit -m \"fix: 改进MongoDB连接错误处理\" && git push origin master)",
-      "Bash(git add -A && git commit -m \"fix: 修复小程序catchtap事件处理错误\" && git push origin master)"
+      "Bash(git add -A && git commit -m \"fix: 修复小程序catchtap事件处理错误\" && git push origin master)",
+      "Bash(git add -A && git commit -m \"fix: 修复stallId处理确保正确传递给后端API\" && git push origin master)"
     ]
   }
 }

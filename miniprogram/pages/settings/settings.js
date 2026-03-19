@@ -143,7 +143,10 @@ Page({
 
   // 保存设置
   saveSettings() {
-    const stallId = app.globalData.stallId || 'stall1';
+    // 清理stallId（移除可能存在的特殊字符）
+    let stallId = app.globalData.stallId || 'stall1';
+    stallId = stallId.toString().trim();
+
     const that = this;
 
     // 保存到本地
