@@ -4,10 +4,22 @@ App({
     userInfo: null,
     token: null,
     stallId: null,
-    apiBase: 'https://stallpro.vercel.app/api'
+    apiBase: 'https://stallpro.vercel.app/api',
+    cloudEnv: 'stall-prod-5g4xxxxx' // 替换为你的云环境ID
   },
 
   onLaunch(options) {
+    // 初始化云能力
+    if (wx.cloud) {
+      wx.cloud.init({
+        env: this.globalData.cloudEnv,
+        traceUser: true
+      });
+      console.log('云能力初始化成功');
+    } else {
+      console.error('请使用 2.2.3 或以上的基础库以使用云能力');
+    }
+
     // 获取场景值
     console.log('场景值:', options.scene);
 
@@ -18,6 +30,11 @@ App({
 
     // 检查登录状态
     this.checkLogin();
+  },
+
+  // 云数据库初始化
+  getDb() {
+    return wx.cloud.database();
   },
 
   // 检查登录
@@ -38,7 +55,6 @@ App({
       if (this.globalData.userInfo) {
         resolve(this.globalData.userInfo);
       } else {
-        // 尝试从存储获取
         const userInfo = wx.getStorageSync('userInfo');
         if (userInfo) {
           this.globalData.userInfo = userInfo;
@@ -62,5 +78,6 @@ App({
     this.globalData.stallId = null;
     wx.removeStorageSync('token');
     wx.removeStorageSync('userInfo');
+    wx.removeStorageSync('stall_info');
   }
 });

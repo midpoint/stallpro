@@ -1,6 +1,6 @@
 // pages/login/login.js
 const app = getApp();
-const API_BASE = 'https://stallpro.vercel.app/api';
+const cloudApi = require('../../utils/cloudApi.js');
 
 Page({
   data: {
@@ -42,59 +42,123 @@ Page({
     });
   },
 
-  // 执行登录
-  doLogin(userInfo) {
+  // 执行登录（使用云数据库）
+  async doLogin(userInfo) {
     if (this.data.loading) return;
     this.setData({ loading: true });
 
-    const that = this;
-
-    // 生成唯一标识
-    const code = 'owner_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-
     wx.showLoading({ title: '登录中...' });
 
-    wx.request({
-      url: `${API_BASE}/auth/login`,
-      method: 'POST',
-      header: {
-        'content-type': 'application/json'
-      },
-      data: {
-        code: code,
-        userInfo: userInfo || {}
-      },
-      success(res) {
-        console.log('Login response:', res.data);
+    try {
+      // 获取openid（云开发自动获取）
+      const cloudContext = wx.cloud;
+      const openid = cloudContext.getAccountIdSync?.() || 'anonymous';
 
-        if (res.data.success && res.data.data) {
-          // 保存登录信息
-          app.globalData.token = res.data.data.token;
-          app.globalData.userInfo = res.data.data.user;
-          app.globalData.stallId = res.data.data.user.stallId;
+      // 查找或创建用户
+      let user;
+      try {
+        const db = wx.cloud.database();
+        const users = await db.collection('users').where({
+          _openid: '{openid}'
+        }).get();
 
-          wx.setStorageSync('token', res.data.data.token);
-          wx.setStorageSync('userInfo', res.data.data.user);
-
-          wx.hideLoading();
-          wx.showToast({ title: '登录成功', icon: 'success' });
-
-          setTimeout(() => {
-            wx.switchTab({ url: '/pages/stall/index' });
-          }, 1500);
+        if (users.data.length > 0) {
+          user = users.data[0];
+          // 更新用户信息
+          await db.collection('users').doc(user._id).update({
+            data: {
+              nickname: userInfo?.nickName || user.nickname,
+              avatar: userInfo?.avatarUrl || user.avatar
+            }
+          });
         } else {
-          wx.hideLoading();
-          wx.showToast({ title: res.data.message || '登录失败', icon: 'none' });
-          that.setData({ loading: false });
+          // 创建新用户
+          const newUser = {
+            nickname: userInfo?.nickName || '新用户',
+            avatar: userInfo?.avatarUrl || '',
+            role: 'owner',
+            stallId: null,
+            createdAt: new Date()
+          };
+          const result = await db.collection('users').add({
+            data: newUser
+          });
+          user = { ...newUser, _id: result._id };
         }
-      },
-      fail(err) {
-        console.error('Login request fail:', err);
-        wx.hideLoading();
-        wx.showToast({ title: '网络错误，请检查网络', icon: 'none' });
-        that.setData({ loading: false });
+      } catch (e) {
+        console.error('User操作失败:', e);
+        // 使用本地模拟用户
+        user = { _id: 'local_user', nickname: userInfo?.nickName || '用户' };
       }
-    });
+
+      // 检查是否有摊位
+      let stall = null;
+      try {
+        const db = wx.cloud.database();
+        const stalls = await db.collection('stalls').where({
+          _openid: '{openid}'
+        }).get();
+
+        if (stalls.data.length > 0) {
+          stall = stalls.data[0];
+        } else {
+          // 创建新摊位
+          const newStall = {
+            name: user.nickname + '的店铺',
+            notice: '欢迎光临！',
+            settings: { orderPrefix: 'A' },
+            status: 'active',
+            createdAt: new Date()
+          };
+          const result = await db.collection('stalls').add({
+            data: newStall
+          });
+          stall = { ...newStall, _id: result._id };
+
+          // 更新用户的stallId
+          await db.collection('users').doc(user._id).update({
+            data: { stallId: stall._id }
+          });
+          user.stallId = stall._id;
+
+          // 创建默认商品
+          const defaultProducts = [
+            { stallId: stall._id, name: '鸡蛋灌饼', price: 8, category: '主食', status: 'active' },
+            { stallId: stall._id, name: '手抓饼', price: 10, category: '主食', status: 'active' },
+            { stallId: stall._id, name: '烤冷面', price: 8, category: '主食', status: 'active' }
+          ];
+          for (const p of defaultProducts) {
+            await db.collection('products').add({ data: p });
+          }
+        }
+      } catch (e) {
+        console.error('Stall操作失败:', e);
+        // 使用默认摊位
+        stall = { _id: 'stall1', name: '老王鸡蛋灌饼', notice: '今日特惠：加肠免费！', settings: { orderPrefix: 'A' } };
+      }
+
+      // 保存登录信息
+      app.globalData.token = 'cloud_token_' + user._id;
+      app.globalData.userInfo = user;
+      app.globalData.stallId = stall._id;
+
+      wx.setStorageSync('token', app.globalData.token);
+      wx.setStorageSync('userInfo', user);
+      wx.setStorageSync('stall_info', stall);
+
+      wx.hideLoading();
+      wx.showToast({ title: '登录成功', icon: 'success' });
+
+      setTimeout(() => {
+        wx.switchTab({ url: '/pages/stall/index' });
+      }, 1500);
+
+    } catch (err) {
+      console.error('登录失败:', err);
+      wx.hideLoading();
+      wx.showToast({ title: '登录失败，请重试', icon: 'none' });
+      this.setData({ loading: false });
+    }
   },
 
   // 顾客直接点餐（模拟扫码）

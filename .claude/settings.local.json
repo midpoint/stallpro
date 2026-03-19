@@ -70,7 +70,8 @@
       "Bash(git add -A && git commit -m \"fix: 添加调试日志，修复stallId获取问题\" && git push origin master)",
       "Bash(git add -A && git commit -m \"feat: 优化摊主微信登录功能，支持游客模式备用\" && git push origin master)",
       "Bash(curl -s -X POST https://stallpro.vercel.app/api/auth/login -H \"Content-Type: application/json\" -d '{\"code\":\"test123\",\"userInfo\":{\"nickName\":\"测试\"}}')",
-      "Bash(git add -A && git commit -m \"fix: 后端默认使用内存数据，MongoDB可选\" && git push origin master)"
+      "Bash(git add -A && git commit -m \"fix: 后端默认使用内存数据，MongoDB可选\" && git push origin master)",
+      "Bash(git add -A && git commit -m \"feat: 基础微信云开发集成\n\n- app.js 添加云能力初始化\n- 创建 cloudApi.js 云数据库API封装\n- 登录页面支持云数据库登录\n- 店铺设置页面支持云数据库保存\n\n注意：需要先在微信开发者工具中开通云开发\" && git push origin master)"
     ]
   }
 }

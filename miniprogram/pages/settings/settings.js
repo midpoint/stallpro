@@ -1,6 +1,5 @@
 // pages/settings/settings.js
 const app = getApp();
-const API_BASE = 'https://stallpro.vercel.app/api';
 
 Page({
   data: {
@@ -26,44 +25,35 @@ Page({
     this.loadSettings();
   },
 
-  loadSettings() {
-    // 从本地存储获取stallId
-    const userInfo = wx.getStorageSync('userInfo');
-    let stallId = app.globalData.stallId || (userInfo && userInfo.stallId) || 'stall1';
-    stallId = stallId.toString().trim();
-
-    console.log('Settings load stallId:', stallId);
-
+  async loadSettings() {
     const that = this;
 
-    // 优先从本地存储加载店铺信息
+    // 优先从本地存储加载
     const localStallInfo = wx.getStorageSync('stall_info');
     if (localStallInfo) {
-      console.log('Using local stall info:', localStallInfo);
       that.setData({ stall: localStallInfo });
     }
 
-    // 从本地存储加载设置
     const localSettings = wx.getStorageSync('stall_settings');
     if (localSettings) {
       this.setData({ settings: localSettings });
     }
 
-    // 再从API获取最新数据
-    wx.request({
-      url: `${API_BASE}/stall/${stallId}`,
-      success(res) {
-        console.log('API stall response:', res.data);
-        if (res.data.success && res.data.data) {
-          that.setData({ stall: res.data.data });
-          // 更新本地存储
-          wx.setStorageSync('stall_info', res.data.data);
-        }
-      },
-      fail(err) {
-        console.log('API stall error:', err);
+    // 从云数据库获取最新数据
+    try {
+      const stallId = app.globalData.stallId;
+      if (!stallId) return;
+
+      const db = wx.cloud.database();
+      const result = await db.collection('stalls').doc(stallId).get();
+
+      if (result.data) {
+        that.setData({ stall: result.data });
+        wx.setStorageSync('stall_info', result.data);
       }
-    });
+    } catch (e) {
+      console.log('loadSettings from cloud failed:', e);
+    }
   },
 
   // 编辑店铺名称
@@ -161,7 +151,9 @@ Page({
   },
 
   // 保存设置
-  saveSettings() {
+  async saveSettings() {
+    const that = this;
+
     // 保存到本地存储
     wx.setStorageSync('stall_settings', this.data.settings);
 
@@ -175,23 +167,18 @@ Page({
 
     wx.showToast({ title: '保存成功', icon: 'success' });
 
-    // 发送到后端
-    const userInfo = wx.getStorageSync('userInfo');
-    let stallId = app.globalData.stallId || (userInfo && userInfo.stallId) || 'stall1';
-    stallId = stallId.toString().trim();
+    // 保存到云数据库
+    try {
+      const stallId = app.globalData.stallId;
+      if (!stallId) return;
 
-    console.log('Saving with stallId:', stallId);
-
-    wx.request({
-      url: `${API_BASE}/stall/${stallId}`,
-      method: 'PUT',
-      data: stallInfo,
-      success(res) {
-        console.log('Save response:', res.data);
-      },
-      fail(err) {
-        console.log('Save error:', err);
-      }
-    });
+      const db = wx.cloud.database();
+      await db.collection('stalls').doc(stallId).update({
+        data: stallInfo
+      });
+      console.log('保存到云端成功');
+    } catch (e) {
+      console.log('保存到云端失败:', e);
+    }
   }
 });
