@@ -959,3 +959,247 @@ input:checked + .slider:before {
   font-size: 14px;
   text-decoration: none;
 }
+
+/* 商品分类 */
+.product-category {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+
+/* 商品操作按钮 */
+.product-btns {
+  display: flex;
+  gap: 8px;
+  margin-left: 12px;
+}
+
+.btn-icon {
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: #f5f5f5;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+}
+
+.btn-icon:hover {
+  background: #e5e5e5;
+}
+
+/* 商品统计 */
+.product-stats {
+  display: flex;
+  background: var(--white);
+  border-radius: 12px;
+  padding: 16px;
+  margin-top: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.product-stat-item {
+  flex: 1;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+}
+
+.product-stat-item .stat-num {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--primary-color);
+}
+
+.product-stat-item .stat-label {
+  font-size: 11px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+
+/* Emoji选择器 */
+.emoji-selector {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.emoji-option {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  border: 2px solid var(--border-color);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.emoji-option.active {
+  border-color: var(--primary-color);
+  background: #FFF7E6;
+}
+
+/* 状态选择器 */
+.status-selector {
+  display: flex;
+  gap: 12px;
+}
+
+.status-option {
+  flex: 1;
+  padding: 12px;
+  border: 2px solid var(--border-color);
+  border-radius: 8px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.status-option.active {
+  border-color: var(--primary-color);
+  background: #FFF7E6;
+  color: var(--primary-color);
+}
+
+/* 点餐二维码说明 */
+.order-qrcode-intro {
+  background: #e6f7ff;
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 16px;
+  font-size: 14px;
+  color: #1890ff;
+}
+
+.order-qrcode-intro p {
+  margin: 0;
+}
+
+.qrcode-tips {
+  background: #f6f8fa;
+  border-radius: 8px;
+  padding: 12px;
+  margin-top: 16px;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.qrcode-tips h4 {
+  margin: 0 0 8px 0;
+  font-size: 13px;
+  color: var(--text-primary);
+}
+
+.qrcode-tips ul {
+  margin: 0;
+  padding-left: 16px;
+}
+
+.qrcode-tips li {
+  margin-bottom: 4px;
+}
+
+/* 点餐链接 */
+.qrcode-link {
+  margin-top: 16px;
+  text-align: left;
+}
+
+.qrcode-link label {
+  display: block;
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+}
+
+.qrcode-link .form-input {
+  font-size: 12px;
+  margin-bottom: 8px;
+}
+
+.btn-small {
+  padding: 8px 16px;
+  font-size: 13px;
+}
+
+/* 详细统计卡片 */
+.stats-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.stats-detail-card {
+  background: var(--white);
+  border-radius: 12px;
+  padding: 16px;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.stats-detail-card .detail-icon {
+  font-size: 24px;
+  margin-bottom: 8px;
+}
+
+.stats-detail-card .detail-num {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--primary-color);
+}
+
+.stats-detail-card .detail-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+
+/* 时间分布 */
+.time-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.time-bar-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.time-bar-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+  width: 50px;
+}
+
+.time-bar {
+  flex: 1;
+  height: 12px;
+  background: #f0f0f0;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.time-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--primary-color) 0%, #FF8F5C 100%);
+  border-radius: 6px;
+  transition: width 0.3s;
+}
+
+.time-bar-value {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--primary-color);
+  width: 30px;
+  text-align: right;
+}

@@ -146,6 +146,19 @@ function App() {
   const [showCallScreen, setShowCallScreen] = useState(false);
   const [productsList, setProductsList] = useState(products);
 
+  // 商品弹窗状态
+  const [showProductModal, setShowProductModal] = useState(false);
+  const [editingProduct, setEditingProduct] = useState(null);
+  const [newProduct, setNewProduct] = useState({
+    name: '',
+    price: '',
+    category: '主食',
+    image: '🥚',
+    stock: 999,
+    status: 'active',
+    specs: []
+  });
+
   // 设置状态
   const [settings, setSettings] = useState({
     voiceEnabled: true,
@@ -160,7 +173,10 @@ function App() {
     paymentMethod: 'wechat', // wechat, alipay, both
     wechatAccount: '',
     alipayAccount: '',
-    qrcodeGenerated: false
+    qrcodeGenerated: false,
+    // 点餐二维码
+    orderQrcodeUrl: '', // 点餐链接
+    orderQrcodeGenerated: false
   });
 
   const [showSettingsModal, setShowSettingsModal] = useState(null); // 当前打开的设置弹窗
@@ -168,6 +184,62 @@ function App() {
   // 更新设置
   const updateSetting = (key, value) => {
     setSettings(prev => ({ ...prev, [key]: value }));
+  };
+
+  // 打开添加商品弹窗
+  const openAddProduct = () => {
+    setEditingProduct(null);
+    setNewProduct({
+      name: '',
+      price: '',
+      category: '主食',
+      image: '🥚',
+      stock: 999,
+      status: 'active',
+      specs: []
+    });
+    setShowProductModal(true);
+  };
+
+  // 打开编辑商品弹窗
+  const openEditProduct = (product) => {
+    setEditingProduct(product);
+    setNewProduct({ ...product });
+    setShowProductModal(true);
+  };
+
+  // 保存商品
+  const saveProduct = () => {
+    if (!newProduct.name || !newProduct.price) {
+      alert('请填写商品名称和价格');
+      return;
+    }
+
+    if (editingProduct) {
+      // 编辑商品
+      setProductsList(prev => prev.map(p =>
+        p.id === editingProduct.id ? { ...newProduct, id: editingProduct.id, price: parseFloat(newProduct.price) } : p
+      ));
+    } else {
+      // 添加商品
+      const maxId = Math.max(...productsList.map(p => p.id), 0);
+      setProductsList(prev => [...prev, { ...newProduct, id: maxId + 1, price: parseFloat(newProduct.price) }]);
+    }
+    setShowProductModal(false);
+  };
+
+  // 删除商品
+  const deleteProduct = (productId) => {
+    if (confirm('确定要删除这个商品吗？')) {
+      setProductsList(prev => prev.filter(p => p.id !== productId));
+    }
+  };
+
+  // 切换商品状态（上架/下架）
+  const toggleProductStatus = (productId) => {
+    setProductsList(prev => prev.map(p =>
+      p.id === productId ? { ...p, status: p.status === 'active' ? 'inactive' : 'active' } : p
+    ));
   };
 
   // 处理接单
@@ -292,7 +364,7 @@ function App() {
           <div className="products-page">
             <div className="section-header">
               <h2>商品管理</h2>
-              <button className="btn btn-primary" style={{padding: '8px 16px', fontSize: '14px'}}>
+              <button className="btn btn-primary" style={{padding: '8px 16px', fontSize: '14px'}} onClick={openAddProduct}>
                 + 添加商品
               </button>
             </div>
@@ -304,14 +376,42 @@ function App() {
                   <div className="product-info">
                     <div className="product-name">{product.name}</div>
                     <div className="product-price">¥{product.price}</div>
+                    <div className="product-category">{product.category}</div>
                   </div>
                   <div className="product-actions">
                     <span className={`status-badge ${product.status === 'active' ? 'status-active' : 'status-inactive'}`}>
                       {product.status === 'active' ? '上架中' : '已下架'}
                     </span>
+                    <div className="product-btns">
+                      <button className="btn-icon" onClick={() => openEditProduct(product)} title="编辑">✏️</button>
+                      <button className="btn-icon" onClick={() => toggleProductStatus(product.id)} title={product.status === 'active' ? '下架' : '上架'}>
+                        {product.status === 'active' ? '⬇️' : '⬆️'}
+                      </button>
+                      <button className="btn-icon" onClick={() => deleteProduct(product.id)} title="删除">🗑️</button>
+                    </div>
                   </div>
                 </div>
               ))}
+            </div>
+
+            {/* 商品统计 */}
+            <div className="product-stats">
+              <div className="product-stat-item">
+                <span className="stat-num">{productsList.filter(p => p.status === 'active').length}</span>
+                <span className="stat-label">在售商品</span>
+              </div>
+              <div className="product-stat-item">
+                <span className="stat-num">{productsList.length}</span>
+                <span className="stat-label">全部商品</span>
+              </div>
+              <div className="product-stat-item">
+                <span className="stat-num">{productsList.filter(p => p.category === '主食').length}</span>
+                <span className="stat-label">主食</span>
+              </div>
+              <div className="product-stat-item">
+                <span className="stat-num">{productsList.filter(p => p.category === '小吃' || p.category === '饮品').length}</span>
+                <span className="stat-label">小食饮品</span>
+              </div>
             </div>
           </div>
         )}
@@ -334,14 +434,78 @@ function App() {
               </div>
             </div>
 
+            {/* 详细数据 */}
+            <div className="stats-detail-grid">
+              <div className="stats-detail-card">
+                <div className="detail-icon">⏱️</div>
+                <div className="detail-num">{orders.filter(o => o.status === 'completed' || o.status === 'taken').length}</div>
+                <div className="detail-label">已完成</div>
+              </div>
+              <div className="stats-detail-card">
+                <div className="detail-icon">🔥</div>
+                <div className="detail-num">{orders.filter(o => o.status === 'cooking').length}</div>
+                <div className="detail-label">制作中</div>
+              </div>
+              <div className="stats-detail-card">
+                <div className="detail-icon">💰</div>
+                <div className="detail-num">¥{orders.length > 0 ? (orders.reduce((sum, o) => sum + (o.paymentStatus === 'paid' ? o.totalAmount : 0), 0) / orders.length).toFixed(1) : 0}</div>
+                <div className="detail-label">客单价</div>
+              </div>
+              <div className="stats-detail-card">
+                <div className="detail-icon">📱</div>
+                <div className="detail-num">100%</div>
+                <div className="detail-label">支付率</div>
+              </div>
+            </div>
+
             {/* 热销商品 */}
             <div className="stats-section">
               <div className="stats-section-title">热销商品</div>
-              {['鸡蛋灌饼 x12', '手抓饼 x8', '烤冷面 x6'].map((item, idx) => (
-                <div key={idx} className="stats-item-row">
-                  <span>{idx + 1}. {item}</span>
-                </div>
-              ))}
+              {(() => {
+                // 统计商品销量
+                const productSales = {};
+                orders.forEach(order => {
+                  order.items.forEach(item => {
+                    if (productSales[item.name]) {
+                      productSales[item.name] += item.quantity;
+                    } else {
+                      productSales[item.name] = item.quantity;
+                    }
+                  });
+                });
+                const sortedProducts = Object.entries(productSales)
+                  .sort((a, b) => b[1] - a[1])
+                  .slice(0, 5);
+                return sortedProducts.length > 0 ? sortedProducts.map((item, idx) => (
+                  <div key={idx} className="stats-item-row">
+                    <span>{idx + 1}. {item[0]}</span>
+                    <span style={{color: 'var(--primary-color)', fontWeight: '600'}}>x{item[1]}</span>
+                  </div>
+                )) : <div className="stats-item-row"><span>暂无数据</span></div>;
+              })()}
+            </div>
+
+            {/* 支付方式 */}
+            <div className="stats-section">
+              <div className="stats-section-title">支付方式</div>
+              {(() => {
+                const paymentStats = {};
+                orders.forEach(order => {
+                  const method = order.paymentMethod || 'wechat';
+                  if (paymentStats[method]) {
+                    paymentStats[method]++;
+                  } else {
+                    paymentStats[method] = 1;
+                  }
+                });
+                const methodMap = { wechat: '微信支付', alipay: '支付宝' };
+                return Object.entries(paymentStats).map(([method, count], idx) => (
+                  <div key={idx} className="stats-item-row">
+                    <span>{methodMap[method] || method}</span>
+                    <span style={{color: 'var(--primary-color)'}}>{count}单</span>
+                  </div>
+                ));
+              })()}
             </div>
 
             {/* 订单高峰 */}
@@ -354,6 +518,22 @@ function App() {
               <div className="stats-item-row">
                 <span>18:00-19:00</span>
                 <span style={{color: 'var(--primary-color)'}}>8单</span>
+              </div>
+            </div>
+
+            {/* 时间段分布 */}
+            <div className="stats-section">
+              <div className="stats-section-title">订单时间分布</div>
+              <div className="time-bars">
+                {['6-9', '9-12', '12-15', '15-18', '18-21', '21-24'].map((time, idx) => (
+                  <div key={idx} className="time-bar-item">
+                    <div className="time-bar-label">{time}时</div>
+                    <div className="time-bar">
+                      <div className="time-bar-fill" style={{width: `${Math.random() * 80 + 20}%`}}></div>
+                    </div>
+                    <div className="time-bar-value">{Math.floor(Math.random() * 10) + 1}</div>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
@@ -377,8 +557,13 @@ function App() {
                 <span>店铺公告</span>
                 <span className="settings-arrow">></span>
               </div>
+              <div className="settings-item" onClick={() => setShowSettingsModal('orderQrcode')}>
+                <span className="settings-icon">📲</span>
+                <span>点餐二维码</span>
+                <span className="settings-arrow">></span>
+              </div>
               <div className="settings-item" onClick={() => setShowSettingsModal('qrcode')}>
-                <span className="settings-icon">📱</span>
+                <span className="settings-icon">💳</span>
                 <span>收款二维码</span>
                 <span className="settings-arrow">></span>
               </div>
@@ -498,6 +683,105 @@ function App() {
 
             <div className="version-info">摆摊666 v1.0.0</div>
 
+            {/* 商品弹窗 */}
+            {showProductModal && (
+              <div className="modal-overlay" onClick={() => setShowProductModal(false)}>
+                <div className="settings-modal" onClick={(e) => e.stopPropagation()}>
+                  <div className="modal-header">
+                    <div className="modal-title">{editingProduct ? '编辑商品' : '添加商品'}</div>
+                    <div className="modal-close" onClick={() => setShowProductModal(false)}>✕</div>
+                  </div>
+
+                  <div className="modal-content">
+                    <div className="form-group">
+                      <label>商品名称 *</label>
+                      <input
+                        type="text"
+                        className="form-input"
+                        placeholder="如：鸡蛋灌饼"
+                        value={newProduct.name}
+                        onChange={(e) => setNewProduct({...newProduct, name: e.target.value})}
+                      />
+                    </div>
+
+                    <div className="form-group">
+                      <label>价格（元） *</label>
+                      <input
+                        type="number"
+                        className="form-input"
+                        placeholder="如：8"
+                        value={newProduct.price}
+                        onChange={(e) => setNewProduct({...newProduct, price: e.target.value})}
+                      />
+                    </div>
+
+                    <div className="form-group">
+                      <label>分类</label>
+                      <select
+                        className="form-input"
+                        value={newProduct.category}
+                        onChange={(e) => setNewProduct({...newProduct, category: e.target.value})}
+                      >
+                        <option value="主食">主食</option>
+                        <option value="小吃">小吃</option>
+                        <option value="饮品">饮品</option>
+                        <option value="配料">配料</option>
+                      </select>
+                    </div>
+
+                    <div className="form-group">
+                      <label>图标</label>
+                      <div className="emoji-selector">
+                        {['🥚', '🌭', '🍜', '🌮', '🥙', '🥛', '🧃', '🍟', '🍡', '🥗'].map(emoji => (
+                          <span
+                            key={emoji}
+                            className={`emoji-option ${newProduct.image === emoji ? 'active' : ''}`}
+                            onClick={() => setNewProduct({...newProduct, image: emoji})}
+                          >
+                            {emoji}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="form-group">
+                      <label>库存</label>
+                      <input
+                        type="number"
+                        className="form-input"
+                        placeholder="数量"
+                        value={newProduct.stock}
+                        onChange={(e) => setNewProduct({...newProduct, stock: parseInt(e.target.value) || 0})}
+                      />
+                    </div>
+
+                    <div className="form-group">
+                      <label>状态</label>
+                      <div className="status-selector">
+                        <div
+                          className={`status-option ${newProduct.status === 'active' ? 'active' : ''}`}
+                          onClick={() => setNewProduct({...newProduct, status: 'active'})}
+                        >
+                          上架
+                        </div>
+                        <div
+                          className={`status-option ${newProduct.status === 'inactive' ? 'active' : ''}`}
+                          onClick={() => setNewProduct({...newProduct, status: 'inactive'})}
+                        >
+                          下架
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="modal-footer">
+                    <button className="btn btn-outline" onClick={() => setShowProductModal(false)}>取消</button>
+                    <button className="btn btn-primary" onClick={saveProduct}>保存</button>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* 设置弹窗 */}
             {showSettingsModal && (
               <div className="modal-overlay" onClick={() => setShowSettingsModal(null)}>
@@ -506,6 +790,7 @@ function App() {
                     <div className="modal-title">
                       {showSettingsModal === 'shop' && '店铺信息'}
                       {showSettingsModal === 'notice' && '店铺公告'}
+                      {showSettingsModal === 'orderQrcode' && '点餐二维码'}
                       {showSettingsModal === 'qrcode' && '收款二维码'}
                       {showSettingsModal === 'sound' && '播报声音'}
                       {showSettingsModal === 'prefix' && '取餐号前缀'}
@@ -516,6 +801,88 @@ function App() {
                   </div>
 
                   <div className="modal-content">
+                    {showSettingsModal === 'orderQrcode' && (
+                      <div className="qrcode-section">
+                        {!settings.orderQrcodeGenerated ? (
+                          <>
+                            <div className="order-qrcode-intro">
+                              <p>生成您的专属点餐二维码，顾客扫码即可浏览菜单下单</p>
+                            </div>
+
+                            <div className="form-group">
+                              <label>摊位ID</label>
+                              <input
+                                type="text"
+                                className="form-input"
+                                defaultValue="stall1"
+                                placeholder="请输入摊位ID"
+                              />
+                            </div>
+
+                            <button
+                              className="btn btn-primary btn-block"
+                              onClick={() => {
+                                const stallId = 'stall1';
+                                const orderUrl = `https://stallpro.vercel.app/menu?stallId=${stallId}`;
+                                setSettings(prev => ({...prev, orderQrcodeUrl: orderUrl, orderQrcodeGenerated: true}));
+                              }}
+                            >
+                              生成点餐二维码
+                            </button>
+
+                            <div className="qrcode-tips">
+                              <h4>使用说明：</h4>
+                              <ul>
+                                <li>将二维码打印出来贴在摊位显眼位置</li>
+                                <li>顾客扫码后直接进入点餐页面</li>
+                                <li>无需下载小程序，微信扫一扫即可</li>
+                                <li>订单会实时推送到您的管理后台</li>
+                              </ul>
+                            </div>
+                          </>
+                        ) : (
+                          <div className="qrcode-generated">
+                            <div className="qrcode-display">
+                              <QRCodeSVG
+                                value={settings.orderQrcodeUrl}
+                                size={180}
+                                level="H"
+                              />
+                            </div>
+                            <p className="qrcode-title">扫码点餐</p>
+                            <p className="qrcode-tip">顾客微信扫一扫直接点餐</p>
+
+                            <div className="qrcode-link">
+                              <label>点餐链接：</label>
+                              <input
+                                type="text"
+                                className="form-input"
+                                value={settings.orderQrcodeUrl}
+                                readOnly
+                              />
+                              <button
+                                className="btn btn-outline btn-small"
+                                onClick={() => {
+                                  navigator.clipboard.writeText(settings.orderQrcodeUrl);
+                                  alert('链接已复制');
+                                }}
+                              >
+                                复制链接
+                              </button>
+                            </div>
+
+                            <button
+                              className="btn btn-outline"
+                              style={{marginTop: '12px'}}
+                              onClick={() => setSettings(prev => ({...prev, orderQrcodeGenerated: false}))}
+                            >
+                              重新生成
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
                     {showSettingsModal === 'shop' && (
                       <div className="form-group">
                         <label>店铺名称</label>
