@@ -1,0 +1,42 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(which flutter && flutter --version)",
+      "Read(//usr/local/**)",
+      "Read(//home/mj/**)",
+      "Read(//opt/**)",
+      "Bash(which snap && snap version)",
+      "Bash(cd ~ && curl -O https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_3.24.0-stable.tar.xz && tar xf flutter_linux_3.24.0-stable.tar.xz && rm flutter_linux_3.24.0-stable.tar.xz)",
+      "Bash(which node && node --version && which npm && npm --version)",
+      "Bash(npm create vite@latest stallpro-app -- --template react)",
+      "Bash(npm init -y)",
+      "Bash(npm install react react-dom react-scripts --save)",
+      "Bash(sleep 10 && curl -s http://localhost:3000 | head -20)",
+      "Bash(curl -s http://localhost:3000 | head -5)",
+      "Bash(curl -s http://localhost:3000 | head -3)",
+      "Bash(npm install qrcode.react --save)",
+      "Bash(which vercel && vercel --version)",
+      "Bash(npm install -g vercel)",
+      "Bash(npm install -g vercel@32 --legacy-peer-deps)",
+      "Bash(mkdir -p ~/.npm-global && npm config set prefix '~/.npm-global' && echo 'export PATH=~/.npm-global/bin:$PATH' >> ~/.bashrc && export PATH=~/.npm-global/bin:$PATH && npm install vercel@32)",
+      "Bash(export PATH=~/.npm-global/bin:$PATH && vercel --version)",
+      "Bash(npm install vercel@32 --save-dev)",
+      "Bash(./node_modules/.bin/vercel --version)",
+      "Bash(cd /home/mj/aicode/stallpro/server && npm install)",
+      "Bash(timeout 5 node index.js 2>&1 || true)",
+      "Bash(timeout 3 node index.js 2>&1 || true)",
+      "Bash(curl -s http://localhost:3001/api/stall/1 | head -5)",
+      "Bash(pkill -f \"node index.js\")",
+      "Bash(./node_modules/.bin/vercel dev --port 3002)",
+      "Bash(sleep 5 && curl -s http://localhost:3002/api/health)",
+      "Bash(cd /home/mj/aicode/stallpro && node -e \"\nconst app = require\\('./server/vercel-api.js'\\);\nconst server = app.listen\\(3003, \\(\\) => {\n  console.log\\('Test server running on port 3003'\\);\n}\\);\nsetTimeout\\(\\(\\) => {\n  const http = require\\('http'\\);\n  http.get\\('http://localhost:3003/api', \\(res\\) => {\n    let data = '';\n    res.on\\('data', chunk => data += chunk\\);\n    res.on\\('end', \\(\\) => {\n      console.log\\('API Response:', data\\);\n      server.close\\(\\);\n      process.exit\\(0\\);\n    }\\);\n  }\\);\n}, 1000\\);\n\")",
+      "Bash(git init)",
+      "Bash(git add DESIGN.md README.md package.json public/ src/ server/ customer-app/ miniprogram/ docs/ .gitignore)",
+      "Bash(git commit -m \"$\\(cat <<'EOF'\nfeat: 摆摊助手 - 初始版本\n\n- 摊主端Web APP \\(React\\)\n- 顾客端H5页面\n- 微信小程序基础代码\n- Node.js后端API\n- Vercel/Railway部署配置\n\nCo-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git remote add origin https://github.com/midpoint/stallpro.git && git push -u origin master)",
+      "Bash(git add miniprogram/app.js && git commit -m \"fix: 配置Vercel API地址\" && git push origin master)",
+      "Bash(git add miniprogram/app.json && git commit -m \"fix: 移除缺失的tabBar图标配置\" && git push origin master)",
+      "Bash(git add -A && git commit -m \"feat: 完善小程序页面wxml和wxss\" && git push origin master)"
+    ]
+  }
+}

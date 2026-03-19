@@ -1,0 +1,52 @@
+<!--pages/stall/index.wxml-->
+<view class="container">
+  <!-- 统计卡片 -->
+  <view class="stats-card">
+    <view class="stats-item">
+      <view class="stats-value">{{stats.orderCount}}</view>
+      <view class="stats-label">今日订单</view>
+    </view>
+    <view class="stats-divider"></view>
+    <view class="stats-item">
+      <view class="stats-value">¥{{stats.todayRevenue}}</view>
+      <view class="stats-label">今日营收</view>
+    </view>
+    <view class="stats-divider"></view>
+    <view class="stats-item">
+      <view class="stats-value">{{stats.pendingCount}}</view>
+      <view class="stats-label">待制作</view>
+    </view>
+  </view>
+
+  <!-- 订单列表 -->
+  <view class="order-section">
+    <view class="section-title">订单列表</view>
+    <block wx:for="{{orders}}" wx:key="id">
+      <view class="order-card {{item.status}}">
+        <view class="order-header">
+          <view class="order-number">{{item.orderNumber}}</view>
+          <view class="order-status {{item.status}}">
+            {{item.status === 'pending' ? '待接单' : item.status === 'cooking' ? '制作中' : '已完成'}}
+          </view>
+        </view>
+        <view class="order-items">
+          <block wx:for="{{item.items}}" wx:for-item="food" wx:key="name">
+            <view class="order-food">{{food.name}} x{{food.quantity}}</view>
+          </block>
+        </view>
+        <view class="order-footer">
+          <view class="order-amount">¥{{item.totalAmount}}</view>
+          <view class="order-actions">
+            <button wx:if="{{item.status === 'pending'}}" size="mini" type="primary" bindtap="acceptOrder" data-id="{{item.id}}">接单</button>
+            <button wx:if="{{item.status === 'cooking'}}" size="mini" type="success" bindtap="completeOrder" data-id="{{item.id}}">完成</button>
+            <button wx:if="{{item.status === 'completed'}}" size="mini" bindtap="callNumber" data-id="{{item.id}}">叫号</button>
+          </view>
+        </view>
+      </view>
+    </block>
+  </view>
+
+  <view class="empty" wx:if="{{orders.length === 0}}">
+    <view>暂无订单</view>
+  </view>
+</view>

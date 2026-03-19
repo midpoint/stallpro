@@ -1,177 +1,100 @@
-// pages/stall/index.js - 摊主端订单管理
+// pages/stall/index.js
 const app = getApp();
-const api = require('../../api/api.js');
 
 Page({
   data: {
     orders: [],
-    loading: false,
     stats: {
       orderCount: 0,
       todayRevenue: 0,
       pendingCount: 0
-    },
-    currentTab: 'all',
-    socketConnected: false
+    }
   },
 
   onLoad() {
-    // 检查是否已登录
-    if (!app.globalData.token) {
-      this.doLogin();
-    } else {
-      this.loadData();
-    }
+    this.loadData();
   },
 
   onShow() {
-    if (app.globalData.token) {
-      this.loadOrders();
-      this.connectWebSocket();
-    }
+    this.loadData();
   },
 
-  onHide() {
-    // 断开WebSocket
-    this.setData({ socketConnected: false });
-  },
-
-  // 登录
-  doLogin() {
-    wx.login({
-      success: (res) => {
-        app.getUserProfile().then(userInfo => {
-          app.login(res.code, userInfo).then(() => {
-            this.loadData();
-          }).catch(err => {
-            wx.showToast({ title: '登录失败', icon: 'none' });
-          });
-        }).catch(() => {
-          // 用户拒绝授权，使用游客模式
-          this.loadData();
-        });
-      }
-    });
-  },
-
-  // 加载数据
   loadData() {
-    this.loadMyStalls();
-    this.loadOrders();
-    this.loadStats();
-    this.connectWebSocket();
-  },
+    const baseUrl = 'https://stallpro.vercel.app/api';
+    const stallId = '1';
+    const that = this;
 
-  // 获取我的摊位
-  loadMyStalls() {
-    api.getMyStalls().then(res => {
-      if (res.success && res.data.length > 0) {
-        app.globalData.stallId = res.data[0]._id;
-        this.setData({ stall: res.data[0] });
-      }
-    });
-  },
-
-  // 加载订单
-  loadOrders() {
-    if (!app.globalData.stallId) return;
-
-    this.setData({ loading: true });
-    api.getStallOrders(app.globalData.stallId, this.data.currentTab === 'all' ? '' : this.data.currentTab)
-      .then(res => {
-        if (res.success) {
-          this.setData({
-            orders: res.data.list,
-            loading: false
-          });
+    // 加载订单列表
+    wx.request({
+      url: `${baseUrl}/order/stall/${stallId}`,
+      success(res) {
+        if (res.data.success) {
+          that.setData({ orders: res.data.data.list || [] });
         }
-      })
-      .catch(() => {
-        this.setData({ loading: false });
-      });
-  },
+      }
+    });
 
-  // 加载统计
-  loadStats() {
-    if (!app.globalData.stallId) return;
-
-    api.getTodayStats(app.globalData.stallId).then(res => {
-      if (res.success) {
-        this.setData({ stats: res.data });
+    // 加载统计数据
+    wx.request({
+      url: `${baseUrl}/stats/today/${stallId}`,
+      success(res) {
+        if (res.data.success) {
+          that.setData({ stats: res.data.data });
+        }
       }
     });
   },
 
-  // 连接WebSocket
-  connectWebSocket() {
-    if (!app.globalData.stallId) return;
-
-    const socketUrl = `ws://localhost:3001`;
-    // 实际项目中需要使用wx.connectSocket
-    // 这里仅作示例
-
-    this.setData({ socketConnected: true });
-    wx.showToast({ title: '已连接', icon: 'success', duration: 1000 });
-  },
-
-  // 切换Tab
-  switchTab(e) {
-    const tab = e.currentTarget.dataset.tab;
-    this.setData({ currentTab: tab }, () => {
-      this.loadOrders();
-    });
-  },
-
-  // 接单
   acceptOrder(e) {
     const orderId = e.currentTarget.dataset.id;
-    wx.showLoading({ title: '处理中...' });
+    const baseUrl = 'https://stallpro.vercel.app/api';
+    const that = this;
 
-    api.updateOrderStatus(orderId, 'cooking').then(res => {
-      wx.hideLoading();
-      if (res.success) {
-        wx.showToast({ title: '已接单', icon: 'success' });
-        this.loadOrders();
-        this.loadStats();
-      }
-    }).catch(() => {
-      wx.hideLoading();
-    });
-  },
-
-  // 完成并叫号
-  completeOrder(e) {
-    const orderId = e.currentTarget.dataset.id;
-
-    wx.showModal({
-      title: '确认完成',
-      content: '是否叫号取餐？',
-      success: (res) => {
-        if (res.confirm) {
-          api.callOrder(orderId).then(() => {
-            wx.showToast({ title: '已叫号', icon: 'success' });
-            this.loadOrders();
-            this.loadStats();
-          });
+    wx.request({
+      url: `${baseUrl}/order/${orderId}/status`,
+      method: 'PUT',
+      data: { status: 'cooking' },
+      success(res) {
+        if (res.data.success) {
+          wx.showToast({ title: '已接单', icon: 'success' });
+          that.loadData();
         }
       }
     });
   },
 
-  // 叫号
-  callNumber(e) {
+  completeOrder(e) {
     const orderId = e.currentTarget.dataset.id;
+    const baseUrl = 'https://stallpro.vercel.app/api';
+    const that = this;
 
-    api.callOrder(orderId).then(() => {
-      wx.showToast({ title: '已叫号', icon: 'success' });
-      this.loadOrders();
+    wx.request({
+      url: `${baseUrl}/order/${orderId}/call`,
+      method: 'POST',
+      success(res) {
+        if (res.data.success) {
+          wx.showToast({ title: '已完成', icon: 'success' });
+          that.loadData();
+        }
+      }
     });
   },
 
-  // 刷新
+  callNumber(e) {
+    const orderId = e.currentTarget.dataset.id;
+    const baseUrl = 'https://stallpro.vercel.app/api';
+
+    wx.request({
+      url: `${baseUrl}/order/${orderId}/call`,
+      method: 'POST',
+      success() {
+        wx.showToast({ title: '已叫号', icon: 'success' });
+      }
+    });
+  },
+
   onPullDownRefresh() {
-    this.loadOrders();
-    this.loadStats();
+    this.loadData();
     wx.stopPullDownRefresh();
   }
 });

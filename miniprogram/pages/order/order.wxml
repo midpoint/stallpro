@@ -1,0 +1,30 @@
+<!--pages/order/order.wxml-->
+<view class="container">
+  <view class="header">
+    <view class="title">我的订单</view>
+  </view>
+
+  <view class="order-list">
+    <block wx:for="{{orders}}" wx:key="id">
+      <view class="order-item">
+        <view class="order-header">
+          <view class="order-number">{{item.orderNumber}}</view>
+          <view class="order-status">{{item.status === 'pending' ? '待接单' : item.status === 'cooking' ? '制作中' : item.status === 'completed' ? '已完成' : '已取餐'}}</view>
+        </view>
+        <view class="order-items">
+          <block wx:for="{{item.items}}" wx:for-item="food" wx:key="name">
+            <view class="order-food">{{food.name}} x{{food.quantity}}</view>
+          </block>
+        </view>
+        <view class="order-footer">
+          <view class="order-time">{{item.createdAt}}</view>
+          <view class="order-amount">¥{{item.totalAmount}}</view>
+        </view>
+      </view>
+    </block>
+  </view>
+
+  <view class="empty" wx:if="{{orders.length === 0}}">
+    <view>暂无订单</view>
+  </view>
+</view>

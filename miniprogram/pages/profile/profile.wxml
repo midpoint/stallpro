@@ -1,0 +1,30 @@
+<!--pages/profile/profile.wxml-->
+<view class="container">
+  <view class="header">
+    <view class="avatar">👤</view>
+    <view class="nickname">摊主</view>
+  </view>
+
+  <view class="menu-list">
+    <view class="menu-item">
+      <view class="menu-icon">🏪</view>
+      <view class="menu-text">我的摊位</view>
+      <view class="menu-arrow">></view>
+    </view>
+    <view class="menu-item">
+      <view class="menu-icon">📊</view>
+      <view class="menu-text">数据统计</view>
+      <view class="menu-arrow">></view>
+    </view>
+    <view class="menu-item">
+      <view class="menu-icon">⚙️</view>
+      <view class="menu-text">设置</view>
+      <view class="menu-arrow">></view>
+    </view>
+    <view class="menu-item">
+      <view class="menu-icon">❓</view>
+      <view class="menu-text">帮助中心</view>
+      <view class="menu-arrow">></view>
+    </view>
+  </view>
+</view>

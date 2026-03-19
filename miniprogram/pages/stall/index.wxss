@@ -1,0 +1,135 @@
+/* pages/stall/index.wxss */
+.container {
+  min-height: 100vh;
+  background: #f5f5f5;
+  padding: 20rpx;
+}
+
+.stats-card {
+  background: white;
+  border-radius: 16rpx;
+  padding: 30rpx;
+  display: flex;
+  margin-bottom: 20rpx;
+}
+
+.stats-item {
+  flex: 1;
+  text-align: center;
+}
+
+.stats-value {
+  font-size: 40rpx;
+  font-weight: bold;
+  color: #FF6B35;
+}
+
+.stats-label {
+  font-size: 24rpx;
+  color: #666;
+  margin-top: 8rpx;
+}
+
+.stats-divider {
+  width: 1px;
+  background: #eee;
+}
+
+.order-section {
+  margin-top: 20rpx;
+}
+
+.section-title {
+  font-size: 30rpx;
+  font-weight: bold;
+  margin-bottom: 16rpx;
+}
+
+.order-card {
+  background: white;
+  border-radius: 16rpx;
+  padding: 24rpx;
+  margin-bottom: 16rpx;
+  border-left: 8rpx solid #ddd;
+}
+
+.order-card.pending {
+  border-left-color: #FF6B35;
+}
+
+.order-card.cooking {
+  border-left-color: #FAAD14;
+}
+
+.order-card.completed {
+  border-left-color: #52C41A;
+}
+
+.order-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12rpx;
+}
+
+.order-number {
+  font-size: 36rpx;
+  font-weight: bold;
+}
+
+.order-status {
+  font-size: 24rpx;
+  padding: 6rpx 16rpx;
+  border-radius: 8rpx;
+}
+
+.order-status.pending {
+  background: #FFF7E6;
+  color: #FAAD14;
+}
+
+.order-status.cooking {
+  background: #FFF7E6;
+  color: #FAAD14;
+}
+
+.order-status.completed {
+  background: #F6FFED;
+  color: #52C41A;
+}
+
+.order-items {
+  padding: 12rpx 0;
+  border-top: 1px solid #f0f0f0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.order-food {
+  font-size: 28rpx;
+  color: #333;
+  margin-bottom: 6rpx;
+}
+
+.order-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 12rpx;
+}
+
+.order-amount {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #FF6B35;
+}
+
+.order-actions {
+  display: flex;
+  gap: 10rpx;
+}
+
+.empty {
+  text-align: center;
+  padding: 100rpx;
+  color: #999;
+}

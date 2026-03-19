@@ -1,0 +1,38 @@
+<!--pages/menu/menu.wxml-->
+<view class="container">
+  <!-- 头部信息 -->
+  <view class="header">
+    <view class="stall-name">{{stall.name}}</view>
+    <view class="stall-notice">{{stall.notice}}</view>
+  </view>
+
+  <!-- 商品列表 -->
+  <view class="menu-list">
+    <view class="category-title">🍔 菜单</view>
+    <block wx:for="{{products}}" wx:key="id">
+      <view class="product-item" bindtap="addToCart" data-product="{{item}}">
+        <view class="product-icon">{{item.name === '鸡蛋灌饼' ? '🥚' : item.name === '手抓饼' ? '🌭' : item.name === '烤冷面' ? '🍜' : '🌭'}}</view>
+        <view class="product-info">
+          <view class="product-name">{{item.name}}</view>
+          <view class="product-price">¥{{item.price}}</view>
+        </view>
+        <view class="add-btn">+</view>
+      </view>
+    </block>
+  </view>
+
+  <!-- 购物车栏 -->
+  <view class="cart-bar" wx:if="{{cartCount > 0}}" bindtap="showCartPanel">
+    <view class="cart-icon">
+      🛒
+      <view class="cart-badge">{{cartCount}}</view>
+    </view>
+    <view class="cart-total">¥{{cartTotal}}</view>
+    <view class="checkout-btn" bindtap="checkout">去结算</view>
+  </view>
+
+  <!-- 空状态 -->
+  <view class="empty" wx:if="{{products.length === 0}}">
+    <view>暂无商品</view>
+  </view>
+</view>
