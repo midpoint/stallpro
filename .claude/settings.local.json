@@ -64,7 +64,8 @@
       "Bash(git add -A && git commit -m \"fix: 改进MongoDB连接错误处理\" && git push origin master)",
       "Bash(git add -A && git commit -m \"fix: 修复小程序catchtap事件处理错误\" && git push origin master)",
       "Bash(git add -A && git commit -m \"fix: 修复stallId处理确保正确传递给后端API\" && git push origin master)",
-      "Bash(git add -A && git commit -m \"fix: 修复设置页面stallId处理\" && git push origin master)"
+      "Bash(git add -A && git commit -m \"fix: 修复设置页面stallId处理\" && git push origin master)",
+      "Bash(git add -A && git commit -m \"fix: 简化设置保存逻辑，优先本地存储\" && git push origin master)"
     ]
   }
 }

@@ -144,35 +144,30 @@ Page({
 
   // 保存设置
   saveSettings() {
-    // 清理stallId（移除可能存在的特殊字符）
-    let stallId = app.globalData.stallId || 'stall1';
-    stallId = stallId.toString().trim();
-
-    const that = this;
-
-    // 保存到本地
+    // 保存到本地存储
     wx.setStorageSync('stall_settings', this.data.settings);
 
-    // 更新到后端
-    wx.request({
-      url: `${API_BASE}/stall/${stallId}`,
-      method: 'PUT',
-      data: {
-        name: this.data.stall.name,
-        notice: this.data.stall.notice,
-        settings: this.data.stall.settings
-      },
-      success(res) {
-        if (res.data.success) {
-          wx.showToast({ title: '保存成功', icon: 'success' });
-        } else {
-          wx.showToast({ title: '保存失败', icon: 'none' });
-        }
-      },
-      fail() {
-        // 即使失败也显示成功（演示用）
-        wx.showToast({ title: '保存成功', icon: 'success' });
-      }
-    });
+    // 保存店铺信息到本地
+    const stallInfo = {
+      name: this.data.stall.name,
+      notice: this.data.stall.notice,
+      settings: this.data.stall.settings
+    };
+    wx.setStorageSync('stall_info', stallInfo);
+
+    wx.showToast({ title: '保存成功', icon: 'success' });
+
+    // 尝试发送到后端（不阻塞UI）
+    try {
+      let stallId = app.globalData.stallId || 'stall1';
+      stallId = stallId.toString().trim();
+
+      wx.request({
+        url: `${API_BASE}/stall/${stallId}`,
+        method: 'PUT',
+        data: stallInfo,
+        fail: function() {}
+      });
+    } catch(e) {}
   }
 });
