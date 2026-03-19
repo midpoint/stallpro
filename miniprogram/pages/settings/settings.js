@@ -27,7 +27,8 @@ Page({
   },
 
   loadSettings() {
-    const stallId = app.globalData.stallId || 'stall1';
+    let stallId = app.globalData.stallId || 'stall1';
+    stallId = stallId.toString().trim();
     const that = this;
 
     // 加载店铺信息
