@@ -211,7 +211,7 @@ app.get('/api/product/stall/:stallId', (req, res) => {
 
 // ===== 订单API =====
 
-// 创建订单
+// 创建订单（待支付）
 app.post('/api/order', (req, res) => {
   const { stallId, items } = req.body;
   const totalAmount = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
@@ -226,12 +226,51 @@ app.post('/api/order', (req, res) => {
     items,
     totalAmount,
     status: 'pending',
-    paymentStatus: 'paid',
+    paymentStatus: 'unpaid',  // 待支付
     createdAt: new Date().toISOString()
   };
 
   mockData.orders.push(order);
   res.json({ success: true, data: order });
+});
+
+// 发起支付
+app.post('/api/order/:id/pay', (req, res) => {
+  const order = mockData.orders.find(o => o._id === req.params.id);
+
+  if (!order) {
+    return res.json({ success: false, message: '订单不存在' });
+  }
+
+  if (order.paymentStatus === 'paid') {
+    return res.json({ success: false, message: '订单已支付' });
+  }
+
+  // TODO: 实际需要调用微信支付统一下单接口
+  // 这里返回模拟的支付参数
+
+  res.json({
+    success: true,
+    data: {
+      orderId: order._id,
+      totalAmount: order.totalAmount,
+      // 模拟支付（演示用）
+      mockPay: true
+    }
+  });
+});
+
+// 支付回调（微信支付成功后会调用此接口）
+app.post('/api/order/:id/payNotify', (req, res) => {
+  const order = mockData.orders.find(o => o._id === req.params.id);
+
+  if (order) {
+    order.paymentStatus = 'paid';
+    order.transactionId = req.body.transactionId || `tx_${Date.now()}`;
+    order.paidAt = new Date().toISOString();
+  }
+
+  res.json({ success: true });
 });
 
 // 获取订单详情

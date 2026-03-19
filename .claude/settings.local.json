@@ -40,7 +40,8 @@
       "Bash(git add -A && git commit -m \"feat: 添加微信登录功能，每个账号对应独立商铺\" && git push origin master)",
       "Bash(git add -A && git commit -m \"fix: 将应用名称更新为摆摊666\" && git push origin master)",
       "Bash(git add miniprogram/project.config.json && git commit -m \"config: 添加小程序AppID配置\" && git push origin master)",
-      "Bash(git add -A && git commit -m \"feat: 区分顾客端和摊主端，顾客扫码点餐无需登录\" && git push origin master)"
+      "Bash(git add -A && git commit -m \"feat: 区分顾客端和摊主端，顾客扫码点餐无需登录\" && git push origin master)",
+      "Bash(git add -A && git commit -m \"feat: 添加微信支付功能，顾客点餐后需支付\" && git push origin master)"
     ]
   }
 }
