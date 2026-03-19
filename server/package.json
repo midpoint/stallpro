@@ -1,7 +1,7 @@
 {
   "name": "stallpro-server",
   "version": "1.0.0",
-  "description": "摆摊助手后端服务",
+  "description": "摆摊666后端服务",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",

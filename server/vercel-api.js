@@ -53,7 +53,7 @@ const verifyToken = (token) => {
 
 // API 路由
 app.get('/api', (req, res) => {
-  res.json({ status: 'ok', message: '摆摊助手 API', version: '2.0.0' });
+  res.json({ status: 'ok', message: '摆摊666 API', version: '2.0.0' });
 });
 
 app.get('/api/health', (req, res) => {

@@ -8,7 +8,7 @@ module.exports = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      message: '摆摊助手 API',
+      message: '摆摊666 API',
       version: '1.0.0'
     });
   } catch (error) {

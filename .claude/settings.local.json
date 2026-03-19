@@ -37,7 +37,8 @@
       "Bash(git add miniprogram/app.js && git commit -m \"fix: 配置Vercel API地址\" && git push origin master)",
       "Bash(git add miniprogram/app.json && git commit -m \"fix: 移除缺失的tabBar图标配置\" && git push origin master)",
       "Bash(git add -A && git commit -m \"feat: 完善小程序页面wxml和wxss\" && git push origin master)",
-      "Bash(git add -A && git commit -m \"feat: 添加微信登录功能，每个账号对应独立商铺\" && git push origin master)"
+      "Bash(git add -A && git commit -m \"feat: 添加微信登录功能，每个账号对应独立商铺\" && git push origin master)",
+      "Bash(git add -A && git commit -m \"fix: 将应用名称更新为摆摊666\" && git push origin master)"
     ]
   }
 }

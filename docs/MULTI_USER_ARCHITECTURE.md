@@ -1,4 +1,4 @@
-# 摆摊助手 - 微信小程序多用户架构方案
+# 摆摊666 - 微信小程序多用户架构方案
 
 ## 一、系统架构
 
@@ -178,7 +178,7 @@ io.on('connection', (socket) => {
     "pages/stall-admin/stall-admin"
   ],
   "window": {
-    "navigationBarTitleText": "摆摊助手"
+    "navigationBarTitleText": "摆摊666"
   },
   "tabBar": {
     "color": "#666",

@@ -496,7 +496,7 @@ function App() {
               </div>
             </div>
 
-            <div className="version-info">摆摊助手 v1.0.0</div>
+            <div className="version-info">摆摊666 v1.0.0</div>
 
             {/* 设置弹窗 */}
             {showSettingsModal && (
@@ -684,7 +684,7 @@ function App() {
                     {showSettingsModal === 'about' && (
                       <div className="about-section">
                         <div className="about-logo">🏪</div>
-                        <h3>摆摊助手</h3>
+                        <h3>摆摊666</h3>
                         <p>版本 1.0.0</p>
                         <p className="about-desc">边做边卖、边接单、边收款、叫号不用喊</p>
                         <div className="about-links">
