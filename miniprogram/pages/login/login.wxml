@@ -1,0 +1,14 @@
+<!--pages/login/login.wxml-->
+<view class="container">
+  <view class="logo">🏪</view>
+  <view class="title">摆摊助手</view>
+  <view class="subtitle">边做边卖 · 边接单 · 边收款</view>
+
+  <button class="login-btn" bindtap="handleLogin">
+    <text>微信授权登录</text>
+  </button>
+
+  <view class="tips">
+    登录后自动创建专属摊位
+  </view>
+</view>

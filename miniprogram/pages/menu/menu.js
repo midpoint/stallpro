@@ -1,5 +1,6 @@
 // pages/menu/menu.js
 const app = getApp();
+const API_BASE = 'https://stallpro.vercel.app/api';
 
 Page({
   data: {
@@ -7,25 +8,43 @@ Page({
     products: [],
     cart: [],
     cartCount: 0,
-    cartTotal: 0
+    cartTotal: 0,
+    isLoggedIn: false
   },
 
   onLoad(options) {
-    const stallId = options.stallId || '1';
-    this.loadData(stallId);
+    // 检查登录状态
+    this.checkLogin();
+
+    // 从分享链接获取摊位ID
+    if (options.stallId) {
+      app.globalData.stallId = options.stallId;
+    }
   },
 
   onShow() {
-    // 每次显示时刷新数据
-    this.loadData('1');
+    // 每次显示时检查登录并刷新数据
+    if (app.isLoggedIn()) {
+      this.loadData();
+    }
   },
 
-  loadData(stallId) {
-    const baseUrl = 'https://stallpro.vercel.app/api';
+  checkLogin() {
+    if (!app.isLoggedIn()) {
+      // 未登录，跳转到登录页
+      wx.redirectTo({ url: '/pages/login/login' });
+      return;
+    }
+    this.setData({ isLoggedIn: true });
+    this.loadData();
+  },
+
+  loadData() {
+    const stallId = app.globalData.stallId || 'stall1';
 
     // 加载摊位信息
     wx.request({
-      url: `${baseUrl}/stall/${stallId}`,
+      url: `${API_BASE}/stall/${stallId}`,
       success: (res) => {
         if (res.data.success) {
           this.setData({ stall: res.data.data });
@@ -35,7 +54,7 @@ Page({
 
     // 加载商品列表
     wx.request({
-      url: `${baseUrl}/product/stall/${stallId}`,
+      url: `${API_BASE}/product/stall/${stallId}`,
       success: (res) => {
         if (res.data.success) {
           this.setData({ products: res.data.data });
@@ -74,17 +93,20 @@ Page({
   checkout() {
     if (this.data.cart.length === 0) return;
 
-    const baseUrl = 'https://stallpro.vercel.app/api';
+    const stallId = app.globalData.stallId || 'stall1';
     const that = this;
 
+    wx.showLoading({ title: '提交中...' });
+
     wx.request({
-      url: `${baseUrl}/order`,
+      url: `${API_BASE}/order`,
       method: 'POST',
       data: {
-        stallId: '1',
+        stallId: stallId,
         items: this.data.cart
       },
       success(res) {
+        wx.hideLoading();
         if (res.data.success) {
           wx.showToast({ title: '下单成功!', icon: 'success' });
           that.setData({ cart: [], cartCount: 0, cartTotal: 0 });
@@ -93,13 +115,14 @@ Page({
         }
       },
       fail() {
+        wx.hideLoading();
         wx.showToast({ title: '网络错误', icon: 'none' });
       }
     });
   },
 
   onPullDownRefresh() {
-    this.loadData('1');
+    this.loadData();
     wx.stopPullDownRefresh();
   }
 });

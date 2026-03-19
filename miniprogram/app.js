@@ -23,43 +23,44 @@ App({
   // 检查登录
   checkLogin() {
     const token = wx.getStorageSync('token');
+    const userInfo = wx.getStorageSync('userInfo');
+
     if (token) {
       this.globalData.token = token;
+      this.globalData.userInfo = userInfo;
+      this.globalData.stallId = userInfo?.stallId;
     }
   },
 
-  // 登录
-  login(code, userInfo) {
+  // 获取用户信息（带自动登录）
+  getUserInfo() {
     return new Promise((resolve, reject) => {
-      wx.request({
-        url: `${this.globalData.apiBase}/auth/wechat_login`,
-        method: 'POST',
-        data: { code, userInfo },
-        success: (res) => {
-          if (res.data.success) {
-            this.globalData.token = res.data.data.token;
-            this.globalData.userInfo = res.data.data.user;
-            wx.setStorageSync('token', res.data.data.token);
-            resolve(res.data.data);
-          } else {
-            reject(res.data.message);
-          }
-        },
-        fail: reject
-      });
+      if (this.globalData.userInfo) {
+        resolve(this.globalData.userInfo);
+      } else {
+        // 尝试从存储获取
+        const userInfo = wx.getStorageSync('userInfo');
+        if (userInfo) {
+          this.globalData.userInfo = userInfo;
+          resolve(userInfo);
+        } else {
+          reject(null);
+        }
+      }
     });
   },
 
-  // 获取用户信息
-  getUserProfile() {
-    return new Promise((resolve, reject) => {
-      wx.getUserProfile({
-        desc: '用于完善用户资料',
-        success: (res) => {
-          resolve(res.userInfo);
-        },
-        fail: reject
-      });
-    });
+  // 检查是否已登录
+  isLoggedIn() {
+    return !!this.globalData.token;
+  },
+
+  // 退出登录
+  logout() {
+    this.globalData.token = null;
+    this.globalData.userInfo = null;
+    this.globalData.stallId = null;
+    wx.removeStorageSync('token');
+    wx.removeStorageSync('userInfo');
   }
 });

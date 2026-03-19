@@ -53,3 +53,10 @@
   color: #ccc;
   font-size: 28rpx;
 }
+
+.logout-btn {
+  margin: 40rpx 20rpx;
+  background: white;
+  color: #666;
+  border-radius: 16rpx;
+}
