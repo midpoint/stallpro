@@ -3,9 +3,10 @@
 > 边做边卖、边接单、边收款、叫号不用喊
 
 # 界面展示
-<img width="30%" alt="1" src="https://github.com/user-attachments/assets/09b87219-d82a-43c5-93d0-0881d37b9b24" />
-<img width="30%" alt="2" src="https://github.com/user-attachments/assets/ae424c12-e435-4b8f-a958-cb311bc74bc8" />
-<img width="30%" alt="3" src="https://github.com/user-attachments/assets/a405bb20-88c4-477d-9d26-e54332a056b3" />
+<img width="20%" alt="0" src="https://github.com/user-attachments/assets/cb288337-5569-46ce-9ab6-b31691dca270" />
+<img width="20%" alt="3" src="https://github.com/user-attachments/assets/a405bb20-88c4-477d-9d26-e54332a056b3" />
+<img width="20%" alt="1" src="https://github.com/user-attachments/assets/09b87219-d82a-43c5-93d0-0881d37b9b24" />
+<img width="20%" alt="2" src="https://github.com/user-attachments/assets/ae424c12-e435-4b8f-a958-cb311bc74bc8" />
 
 ## 项目概述
 
