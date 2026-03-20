@@ -42,7 +42,7 @@
   "compileType": "miniprogram",
   "cloudfunctionRoot": "cloudfunctions/",
   "libVersion": "3.0.0",
-  "appid": "wx29ed7b866c87a837",
+  "appid": "YOUR_WECHAT_APPID",
   "projectname": "摆摊666",
   "condition": {},
   "editorSetting": {

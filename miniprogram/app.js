@@ -4,7 +4,7 @@ App({
     userInfo: null,
     token: null,
     stallId: null,
-    cloudEnv: 'cloud1-0g8ubqo1e64344a2'
+    cloudEnv: 'YOUR_CLOUD_ENV_ID'
   },
 
   onLaunch(options) {

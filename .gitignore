@@ -6,6 +6,10 @@ package-lock.json
 .env
 .env.local
 
+# 微信小程序敏感文件
+miniprogram/appid.txt
+miniprogram/.env
+
 # 构建产物
 build/
 dist/
