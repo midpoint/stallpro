@@ -1,0 +1,69 @@
+<view class="container">
+  <!-- Tab切换 -->
+  <view class="tab-bar">
+    <view class="tab-item {{tab === 'today' ? 'active' : ''}}" bindtap="switchTab" data-tab="today">今日</view>
+    <view class="tab-item {{tab === 'week' ? 'active' : ''}}" bindtap="switchTab" data-tab="week">本周</view>
+    <view class="tab-item {{tab === 'month' ? 'active' : ''}}" bindtap="switchTab" data-tab="month">本月</view>
+  </view>
+
+  <!-- 统计卡片 -->
+  <view class="stats-card">
+    <view class="stats-item">
+      <view class="stats-value">{{summary.orderCount}}</view>
+      <view class="stats-label">订单数</view>
+    </view>
+    <view class="stats-divider"></view>
+    <view class="stats-item">
+      <view class="stats-value">¥{{summary.revenue}}</view>
+      <view class="stats-label">营收</view>
+    </view>
+    <view class="stats-divider"></view>
+    <view class="stats-item">
+      <view class="stats-value">¥{{summary.avgOrderValue}}</view>
+      <view class="stats-label">客单价</view>
+    </view>
+  </view>
+
+  <!-- 营收趋势 -->
+  <view class="section">
+    <view class="section-title">营收趋势</view>
+    <view class="trend-chart">
+      <view class="trend-bars" wx:if="{{trend.length > 0}}">
+        <view wx:for="{{trend}}" wx:key="date" class="trend-bar-wrap">
+          <view class="trend-bar" style="height: {{item.percent}}%"></view>
+          <view class="trend-label">{{item.dateStr}}</view>
+        </view>
+      </view>
+      <view class="empty-chart" wx:else>暂无数据</view>
+    </view>
+  </view>
+
+  <!-- 热销商品 -->
+  <view class="section">
+    <view class="section-title">热销商品 TOP10</view>
+    <view class="product-list" wx:if="{{topProducts.length > 0}}">
+      <view wx:for="{{topProducts}}" wx:key="name" class="product-item">
+        <view class="product-rank {{index < 3 ? 'top' : ''}}">{{index + 1}}</view>
+        <view class="product-icon">{{item.icon}}</view>
+        <view class="product-name">{{item.name}}</view>
+        <view class="product-count">x{{item.count}}</view>
+        <view class="product-revenue">¥{{item.revenue}}</view>
+      </view>
+    </view>
+    <view class="empty-list" wx:else>暂无数据</view>
+  </view>
+
+  <!-- 高峰时段 -->
+  <view class="section">
+    <view class="section-title">订单高峰时段</view>
+    <view class="peak-list" wx:if="{{peakHours.length > 0}}">
+      <view wx:for="{{peakHours}}" wx:key="hour" class="peak-item {{index === 0 ? 'peak-top' : ''}}">
+        <view class="peak-badge" wx:if="{{index === 0}}">峰值</view>
+        <view class="peak-time">{{item.hourStr}}</view>
+        <view class="peak-count">{{item.count}}单</view>
+        <view class="peak-bar" style="width: {{item.percent}}%"></view>
+      </view>
+    </view>
+    <view class="empty-list" wx:else>暂无数据</view>
+  </view>
+</view>

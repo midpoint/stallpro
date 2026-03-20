@@ -75,12 +75,36 @@
 
 /* 快捷操作 */
 .quick-actions {
-  display: flex;
   background: white;
   border-radius: 16rpx;
   padding: 20rpx;
   margin-bottom: 20rpx;
   box-shadow: 0 2rpx 8rpx rgba(0,0,0,0.06);
+}
+
+.quick-action-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 30rpx;
+  background: linear-gradient(135deg, #FF6B35 0%, #E55A2B 100%);
+  border-radius: 12rpx;
+  margin-bottom: 16rpx;
+}
+
+.quick-action-btn .quick-icon {
+  font-size: 48rpx;
+}
+
+.quick-action-btn .quick-text {
+  font-size: 28rpx;
+  color: #fff;
+  font-weight: bold;
+}
+
+.quick-actions-row {
+  display: flex;
+  justify-content: space-around;
 }
 
 .quick-action {
@@ -315,4 +339,122 @@
   font-size: 20rpx;
   color: #999;
   word-break: break-all;
+}
+
+.qrcode-placeholder {
+  width: 300rpx;
+  height: 300rpx;
+  background: #f5f5f5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-size: 24rpx;
+  color: #999;
+  line-height: 1.6;
+}
+
+.qrcode-loading {
+  width: 300rpx;
+  height: 300rpx;
+  background: #f5f5f5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24rpx;
+  color: #999;
+}
+
+/* 收款码弹窗 */
+.qrcode-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20rpx;
+}
+
+.qrcode-close {
+  font-size: 48rpx;
+  color: #999;
+  line-height: 1;
+}
+
+.payment-tabs {
+  display: flex;
+  border-bottom: 1rpx solid #eee;
+  margin-bottom: 20rpx;
+}
+
+.payment-tab {
+  flex: 1;
+  text-align: center;
+  padding: 16rpx 0;
+  font-size: 28rpx;
+  color: #666;
+  position: relative;
+}
+
+.payment-tab.active {
+  color: #FF6B35;
+  font-weight: bold;
+}
+
+.payment-tab.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 50rpx;
+  height: 4rpx;
+  background: #FF6B35;
+  border-radius: 2rpx;
+}
+
+.payment-body {
+  min-height: 350rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.payment-section {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.account-info {
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+  margin-bottom: 20rpx;
+  width: 100%;
+  padding: 16rpx;
+  background: #f9f9f9;
+  border-radius: 8rpx;
+  font-size: 24rpx;
+  color: #666;
+  text-align: left;
+}
+
+.placeholder-icon {
+  font-size: 60rpx;
+  margin-bottom: 16rpx;
+}
+
+.placeholder-text {
+  font-size: 26rpx;
+  color: #666;
+  margin-bottom: 8rpx;
+}
+
+.placeholder-tip {
+  font-size: 22rpx;
+  color: #999;
+}
+
+.action-btn.primary {
+  background: rgba(255,255,255,0.4);
 }

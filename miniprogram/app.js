@@ -4,8 +4,7 @@ App({
     userInfo: null,
     token: null,
     stallId: null,
-    apiBase: 'https://stallpro.vercel.app/api',
-    cloudEnv: 'stall-prod-5g4xxxxx' // 替换为你的云环境ID
+    cloudEnv: 'cloud1-0g8ubqo1e64344a2'
   },
 
   onLaunch(options) {

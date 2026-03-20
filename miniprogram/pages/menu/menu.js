@@ -1,6 +1,5 @@
-// pages/menu/menu.js - 顾客点餐页（无需登录）
+// pages/menu/menu.js - 顾客点餐页
 const app = getApp();
-const API_BASE = 'https://stallpro.vercel.app/api';
 
 Page({
   data: {
@@ -11,42 +10,54 @@ Page({
     cartTotal: 0,
     orderNumber: null,
     showCart: false,
-    pendingOrder: null  // 待支付的订单
+    pendingOrder: null
   },
 
   onLoad(options) {
     // 从URL参数获取摊位ID（扫码进入）
-    const stallId = options.stallId || options.scene || 'stall1';
-    app.globalData.stallId = stallId;
-    this.loadData(stallId);
+    const stallId = options.stallId || options.scene || '';
+    if (stallId) {
+      app.globalData.stallId = stallId;
+      this.loadData(stallId);
+    } else {
+      wx.showToast({ title: '无法访问', icon: 'none' });
+    }
   },
 
   onShow() {
-    const stallId = app.globalData.stallId || 'stall1';
-    this.loadData(stallId);
+    const stallId = app.globalData.stallId;
+    if (stallId) {
+      this.loadData(stallId);
+    }
   },
 
-  loadData(stallId) {
+  async loadData(stallId) {
+    const that = this;
+
     // 加载摊位信息
-    wx.request({
-      url: `${API_BASE}/stall/${stallId}`,
-      success: (res) => {
-        if (res.data.success) {
-          this.setData({ stall: res.data.data });
-          wx.setNavigationBarTitle({ title: res.data.data.name || '点餐' });
-        }
+    try {
+      const db = wx.cloud.database();
+      const stallRes = await db.collection('stalls').doc(stallId).get();
+      if (stallRes.data) {
+        that.setData({ stall: stallRes.data });
+        wx.setNavigationBarTitle({ title: stallRes.data.name || '点餐' });
       }
-    });
+    } catch (e) {
+      console.log('load stall error:', e);
+    }
 
     // 加载商品列表
-    wx.request({
-      url: `${API_BASE}/product/stall/${stallId}`,
-      success: (res) => {
-        if (res.data.success) {
-          this.setData({ products: res.data.data });
-        }
-      }
-    });
+    try {
+      const db = wx.cloud.database();
+      const productsRes = await db.collection('products').where({
+        stallId: stallId,
+        status: 'active'
+      }).get();
+
+      that.setData({ products: productsRes.data || [] });
+    } catch (e) {
+      console.log('load products error:', e);
+    }
   },
 
   addToCart(e) {
@@ -127,126 +138,95 @@ Page({
   stopPropagation() {},
 
   // 提交订单（创建订单）
-  checkout() {
+  async checkout() {
     if (this.data.cart.length === 0) return;
 
-    const stallId = app.globalData.stallId || 'stall1';
+    const stallId = app.globalData.stallId;
     const that = this;
 
     wx.showLoading({ title: '创建订单...' });
 
-    wx.request({
-      url: `${API_BASE}/order`,
-      method: 'POST',
-      data: {
-        stallId: stallId,
-        items: this.data.cart
-      },
-      success(res) {
-        wx.hideLoading();
-        if (res.data.success) {
-          const order = res.data.data;
-          that.setData({
-            pendingOrder: order,
-            showCart: false
-          });
-          // 发起支付
-          that.requestPayment(order);
-        } else {
-          wx.showToast({ title: res.data.message || '创建订单失败', icon: 'none' });
+    try {
+      const db = wx.cloud.database();
+      const stall = this.data.stall;
+      const prefix = stall?.settings?.orderPrefix || 'A';
+
+      const totalAmount = that.data.cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+
+      // 生成订单号
+      const now = new Date();
+      const orderNumber = `${prefix}${now.getMonth() + 1}${now.getDate()}${Math.floor(Math.random() * 100)}`;
+
+      const result = await db.collection('orders').add({
+        data: {
+          stallId,
+          orderNumber,
+          items: that.data.cart,
+          totalAmount,
+          status: 'pending',
+          paymentStatus: 'unpaid',
+          createdAt: new Date()
         }
-      },
-      fail() {
-        wx.hideLoading();
-        wx.showToast({ title: '网络错误', icon: 'none' });
-      }
-    });
-  },
+      });
 
-  // 发起微信支付
-  requestPayment(order) {
-    const that = this;
+      wx.hideLoading();
 
-    // 调用后端获取支付参数
-    wx.request({
-      url: `${API_BASE}/order/${order._id}/pay`,
-      method: 'POST',
-      success(res) {
-        if (res.data.success) {
-          // TODO: 实际调用 wx.requestPayment
-          // 由于没有真实商户号，这里模拟支付成功
+      const order = { _id: result._id, orderNumber, items: that.data.cart, totalAmount };
+      that.setData({
+        pendingOrder: order,
+        showCart: false
+      });
 
-          // 模拟支付成功
-          that.simulatePayment(order);
-        } else {
-          wx.showToast({ title: res.data.message || '支付失败', icon: 'none' });
-        }
-      },
-      fail() {
-        // 网络错误，模拟支付成功演示
-        that.simulatePayment(order);
-      }
-    });
+      // 模拟支付成功
+      that.simulatePayment(order);
+
+    } catch (e) {
+      wx.hideLoading();
+      wx.showToast({ title: '创建订单失败', icon: 'none' });
+      console.log('checkout error:', e);
+    }
   },
 
   // 模拟支付（演示用）
-  simulatePayment(order) {
+  async simulatePayment(order) {
     const that = this;
 
     wx.showLoading({ title: '支付中...' });
 
     // 模拟支付延迟
-    setTimeout(() => {
-      // 调用支付回调
-      wx.request({
-        url: `${API_BASE}/order/${order._id}/payNotify`,
-        method: 'POST',
-        data: { transactionId: `mock_${Date.now()}` },
-        success(payRes) {
-          wx.hideLoading();
+    setTimeout(async () => {
+      try {
+        const db = wx.cloud.database();
+        await db.collection('orders').doc(order._id).update({
+          data: {
+            paymentStatus: 'paid',
+            transactionId: `mock_${Date.now()}`,
+            paidAt: new Date()
+          }
+        });
+      } catch (e) {
+        console.log('pay notify error:', e);
+      }
 
-          // 清空购物车
-          that.setData({
-            cart: [],
-            cartCount: 0,
-            cartTotal: 0,
-            orderNumber: order.orderNumber,
-            pendingOrder: null
-          });
+      wx.hideLoading();
 
-          // 支付成功
-          wx.showModal({
-            title: '支付成功！',
-            content: `取餐号：${order.orderNumber}\n请等待叫号取餐`,
-            showCancel: false,
-            success: () => {
-              // 跳转到订单页面
-              wx.navigateTo({
-                url: `/pages/order/detail?orderId=${order._id}&stallId=${app.globalData.stallId}`
-              });
-            }
-          });
-        },
-        fail() {
-          wx.hideLoading();
-          // 即使回调失败也显示成功（演示用）
-          that.setData({
-            cart: [],
-            cartCount: 0,
-            cartTotal: 0,
-            orderNumber: order.orderNumber,
-            pendingOrder: null
-          });
+      // 清空购物车
+      that.setData({
+        cart: [],
+        cartCount: 0,
+        cartTotal: 0,
+        orderNumber: order.orderNumber,
+        pendingOrder: null
+      });
 
-          wx.showModal({
-            title: '支付成功！',
-            content: `取餐号：${order.orderNumber}\n请等待叫号取餐`,
-            showCancel: false,
-            success: () => {
-              wx.navigateTo({
-                url: `/pages/order/detail?orderId=${order._id}&stallId=${app.globalData.stallId}`
-              });
-            }
+      // 支付成功
+      wx.showModal({
+        title: '支付成功！',
+        content: `取餐号：${order.orderNumber}\n请等待叫号取餐`,
+        showCancel: false,
+        success: () => {
+          wx.navigateTo({
+            url: `/pages/order/detail?orderId=${order._id}&stallId=${app.globalData.stallId}`
           });
         }
       });
@@ -263,16 +243,11 @@ Page({
     });
   },
 
-  // 切换到摊主后台
-  switchToOwner() {
-    wx.switchTab({
-      url: '/pages/stall/index'
-    });
-  },
-
   onPullDownRefresh() {
-    const stallId = app.globalData.stallId || 'stall1';
-    this.loadData(stallId);
+    const stallId = app.globalData.stallId;
+    if (stallId) {
+      this.loadData(stallId);
+    }
     wx.stopPullDownRefresh();
   }
 });

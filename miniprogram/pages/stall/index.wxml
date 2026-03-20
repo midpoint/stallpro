@@ -8,6 +8,7 @@
     </view>
     <view class="stall-actions">
       <view class="action-btn" bindtap="showQrcode">📲二维码</view>
+      <view class="action-btn primary" bindtap="showPaymentQrcode">💰收款码</view>
     </view>
   </view>
 
@@ -31,21 +32,19 @@
 
   <!-- 快捷操作 -->
   <view class="quick-actions">
-    <view class="quick-action" bindtap="goToProducts">
-      <view class="quick-icon">🍔</view>
-      <view class="quick-text">商品管理</view>
+    <view class="quick-action-btn" bindtap="showQrcode">
+      <view class="quick-icon">📲</view>
+      <view class="quick-text">让顾客扫码点餐</view>
     </view>
-    <view class="quick-action" bindtap="goToSettings">
-      <view class="quick-icon">⚙️</view>
-      <view class="quick-text">店铺设置</view>
-    </view>
-    <view class="quick-action" bindtap="testOrder">
-      <view class="quick-icon">🧪</view>
-      <view class="quick-text">测试订单</view>
-    </view>
-    <view class="quick-action" bindtap="testCall">
-      <view class="quick-icon">🔔</view>
-      <view class="quick-text">测试叫号</view>
+    <view class="quick-actions-row">
+      <view class="quick-action" bindtap="testOrder">
+        <view class="quick-icon">🧪</view>
+        <view class="quick-text">测试订单</view>
+      </view>
+      <view class="quick-action" bindtap="testCall">
+        <view class="quick-icon">📢</view>
+        <view class="quick-text">测试叫号</view>
+      </view>
     </view>
   </view>
 
@@ -73,7 +72,7 @@
           <view class="order-footer">
             <view class="order-amount">¥{{item.totalAmount}}</view>
             <view class="order-actions">
-              <button size="mini" type="primary" bindtap="acceptOrder" data-id="{{item.id}}">接单</button>
+              <button size="mini" type="primary" bindtap="acceptOrder" data-id="{{item._id}}">接单</button>
             </view>
           </view>
         </view>
@@ -97,7 +96,7 @@
           <view class="order-footer">
             <view class="order-amount">¥{{item.totalAmount}}</view>
             <view class="order-actions">
-              <button size="mini" type="success" bindtap="completeOrder" data-id="{{item.id}}">完成</button>
+              <button size="mini" type="success" bindtap="completeOrder" data-id="{{item._id}}">完成</button>
             </view>
           </view>
         </view>
@@ -121,7 +120,7 @@
           <view class="order-footer">
             <view class="order-amount">¥{{item.totalAmount}}</view>
             <view class="order-actions">
-              <button size="mini" bindtap="callNumber" data-id="{{item.id}}">叫号</button>
+              <button size="mini" bindtap="callNumber" data-id="{{item._id}}">叫号</button>
             </view>
           </view>
         </view>
@@ -140,10 +139,57 @@
     <view class="qrcode-content" catchtap="stopPropagation">
       <view class="qrcode-title">扫码点餐</view>
       <view class="qrcode-image">
-        <image src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://stallpro.vercel.app/menu?stallId={{stallId}}" />
+        <image src="{{qrcodeUrl}}" mode="aspectFit" wx:if="{{qrcodeUrl}}" />
+        <view class="qrcode-loading" wx:else>加载中...</view>
       </view>
       <view class="qrcode-tip">顾客扫码直接点餐</view>
-      <view class="qrcode-link">https://stallpro.vercel.app/menu?stallId={{stallId}}</view>
+    </view>
+  </view>
+
+  <!-- 收款码弹窗 -->
+  <view class="qrcode-modal {{showPaymentModal ? 'show' : ''}}" bindtap="hidePaymentQrcode">
+    <view class="qrcode-content" catchtap="stopPropagation">
+      <view class="qrcode-header">
+        <view class="qrcode-title">收款二维码</view>
+        <view class="qrcode-close" bindtap="hidePaymentQrcode">×</view>
+      </view>
+      <view class="payment-tabs">
+        <view class="payment-tab {{paymentTab === 'wechat' ? 'active' : ''}}" bindtap="switchPaymentTab" data-tab="wechat">微信支付</view>
+        <view class="payment-tab {{paymentTab === 'alipay' ? 'active' : ''}}" bindtap="switchPaymentTab" data-tab="alipay">支付宝</view>
+      </view>
+      <view class="payment-body">
+        <view wx:if="{{paymentTab === 'wechat'}}" class="payment-section">
+          <view class="account-info" wx:if="{{paymentAccounts.wechat.name || paymentAccounts.wechat.account}}">
+            <text>收款人：{{paymentAccounts.wechat.name || '未设置'}}</text>
+            <text wx:if="{{paymentAccounts.wechat.account}}">账  号：{{paymentAccounts.wechat.account}}</text>
+          </view>
+          <view class="qrcode-image" wx:if="{{paymentAccounts.wechat.qrcodeUrl}}">
+            <image src="{{paymentAccounts.wechat.qrcodeUrl}}" mode="aspectFit" />
+          </view>
+          <view class="qrcode-placeholder" wx:else>
+            <text class="placeholder-icon">💳</text>
+            <text class="placeholder-text">暂未设置微信收款码</text>
+            <text class="placeholder-tip">请在「收款账户设置」中配置</text>
+          </view>
+        </view>
+        <view wx:if="{{paymentTab === 'alipay'}}" class="payment-section">
+          <view class="account-info" wx:if="{{paymentAccounts.alipay.name || paymentAccounts.alipay.account}}">
+            <text>收款人：{{paymentAccounts.alipay.name || '未设置'}}</text>
+            <text wx:if="{{paymentAccounts.alipay.account}}">账  号：{{paymentAccounts.alipay.account}}</text>
+          </view>
+          <view class="qrcode-image" wx:if="{{paymentAccounts.alipay.qrcodeUrl}}">
+            <image src="{{paymentAccounts.alipay.qrcodeUrl}}" mode="aspectFit" />
+          </view>
+          <view class="qrcode-placeholder" wx:else>
+            <text class="placeholder-icon">💳</text>
+            <text class="placeholder-text">暂未设置支付宝收款码</text>
+            <text class="placeholder-tip">请在「收款账户设置」中配置</text>
+          </view>
+        </view>
+      </view>
+      <view class="qrcode-footer">
+        <text>顾客扫码支付，资金直达您的账户</text>
+      </view>
     </view>
   </view>
 </view>

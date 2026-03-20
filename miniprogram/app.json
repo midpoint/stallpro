@@ -7,7 +7,9 @@
     "pages/stall/index",
     "pages/products/products",
     "pages/settings/settings",
-    "pages/profile/profile"
+    "pages/profile/profile",
+    "pages/stats/stats",
+    "pages/shop/paymentAccounts"
   ],
   "window": {
     "backgroundTextStyle": "light",
@@ -27,12 +29,8 @@
         "text": "管理"
       },
       {
-        "pagePath": "pages/menu/menu",
-        "text": "点餐"
-      },
-      {
-        "pagePath": "pages/order/order",
-        "text": "订单"
+        "pagePath": "pages/profile/profile",
+        "text": "我的"
       }
     ]
   }

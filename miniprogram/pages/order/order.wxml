@@ -24,8 +24,8 @@
         <view class="order-footer">
           <view class="order-amount">¥{{item.totalAmount}}</view>
           <view class="order-actions">
-            <button wx:if="{{item.status === 'pending'}}" size="mini" type="primary" bindtap="acceptOrder" data-id="{{item.id}}">接单</button>
-            <button wx:if="{{item.status === 'cooking'}}" size="mini" type="success" bindtap="completeOrder" data-id="{{item.id}}">完成叫号</button>
+            <button wx:if="{{item.status === 'pending'}}" size="mini" type="primary" bindtap="acceptOrder" data-id="{{item._id}}">接单</button>
+            <button wx:if="{{item.status === 'cooking'}}" size="mini" type="success" bindtap="completeOrder" data-id="{{item._id}}">完成叫号</button>
           </view>
         </view>
       </view>

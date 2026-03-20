@@ -1,6 +1,5 @@
 // pages/products/products.js
 const app = getApp();
-const API_BASE = 'https://stallpro.vercel.app/api';
 
 Page({
   data: {
@@ -29,31 +28,24 @@ Page({
     this.loadProducts();
   },
 
-  loadProducts() {
-    let stallId = app.globalData.stallId || 'stall1';
-    stallId = stallId.toString().trim();
-    const that = this;
+  async loadProducts() {
+    const stallId = app.globalData.stallId;
+    if (!stallId) return;
 
-    wx.request({
-      url: `${API_BASE}/product/stall/${stallId}`,
-      success(res) {
-        if (res.data.success) {
-          const products = res.data.data.map((p, idx) => ({
-            id: p._id || `p${idx}`,
-            name: p.name,
-            price: p.price,
-            category: p.category || '主食',
-            icon: '🥚',
-            status: p.status || 'active'
-          }));
+    try {
+      const db = wx.cloud.database();
+      const result = await db.collection('products').where({
+        stallId: stallId
+      }).get();
 
-          const activeCount = products.filter(p => p.status === 'active').length;
-          const inactiveCount = products.filter(p => p.status === 'inactive').length;
+      const products = result.data || [];
+      const activeCount = products.filter(p => p.status === 'active').length;
+      const inactiveCount = products.filter(p => p.status === 'inactive').length;
 
-          that.setData({ products, activeCount, inactiveCount });
-        }
-      }
-    });
+      this.setData({ products, activeCount, inactiveCount });
+    } catch (e) {
+      console.log('loadProducts error:', e);
+    }
   },
 
   // 显示添加弹窗
@@ -103,7 +95,7 @@ Page({
   // 编辑商品
   editProduct(e) {
     const id = e.currentTarget.dataset.id;
-    const product = this.data.products.find(p => p.id === id);
+    const product = this.data.products.find(p => p._id === id);
     if (product) {
       const categoryIndex = this.data.categories.indexOf(product.category);
       this.setData({
@@ -117,7 +109,7 @@ Page({
   },
 
   // 保存商品
-  saveProduct() {
+  async saveProduct() {
     const { name, price, category, icon } = this.data.formData;
 
     if (!name.trim()) {
@@ -129,53 +121,85 @@ Page({
       return;
     }
 
-    let stallId = app.globalData.stallId || 'stall1';
-    stallId = stallId.toString().trim();
+    const stallId = app.globalData.stallId;
+    if (!stallId) {
+      wx.showToast({ title: '请先登录', icon: 'none' });
+      return;
+    }
 
-    // 这里简化处理，实际应该调用后端API
     wx.showLoading({ title: '保存中...' });
 
-    // 模拟保存成功
-    setTimeout(() => {
+    try {
+      const db = wx.cloud.database();
+
+      if (this.data.isEdit) {
+        // 更新商品
+        await db.collection('products').doc(this.data.editId).update({
+          data: { name, price: parseFloat(price), category, icon }
+        });
+      } else {
+        // 添加商品
+        await db.collection('products').add({
+          data: {
+            stallId,
+            name,
+            price: parseFloat(price),
+            category,
+            icon,
+            status: 'active',
+            createdAt: new Date()
+          }
+        });
+      }
+
       wx.hideLoading();
       wx.showToast({ title: '保存成功', icon: 'success' });
       this.hideModal();
       this.loadProducts();
-    }, 500);
+    } catch (e) {
+      wx.hideLoading();
+      wx.showToast({ title: '保存失败', icon: 'none' });
+      console.log('saveProduct error:', e);
+    }
   },
 
   // 切换状态
-  toggleStatus(e) {
+  async toggleStatus(e) {
     const id = e.currentTarget.dataset.id;
-    const products = this.data.products.map(p => {
-      if (p.id === id) {
-        return { ...p, status: p.status === 'active' ? 'inactive' : 'active' };
-      }
-      return p;
-    });
+    const product = this.data.products.find(p => p._id === id);
+    if (!product) return;
 
-    const activeCount = products.filter(p => p.status === 'active').length;
-    const inactiveCount = products.filter(p => p.status === 'inactive').length;
+    const newStatus = product.status === 'active' ? 'inactive' : 'active';
 
-    this.setData({ products, activeCount, inactiveCount });
-    wx.showToast({ title: '已更新', icon: 'success' });
+    try {
+      const db = wx.cloud.database();
+      await db.collection('products').doc(id).update({
+        data: { status: newStatus }
+      });
+      this.loadProducts();
+      wx.showToast({ title: '已更新', icon: 'success' });
+    } catch (e) {
+      wx.showToast({ title: '更新失败', icon: 'none' });
+    }
   },
 
   // 删除商品
-  deleteProduct(e) {
+  async deleteProduct(e) {
     const id = e.currentTarget.dataset.id;
 
     wx.showModal({
       title: '确认删除',
       content: '确定要删除这个商品吗？',
-      success: (res) => {
+      success: async (res) => {
         if (res.confirm) {
-          const products = this.data.products.filter(p => p.id !== id);
-          const activeCount = products.filter(p => p.status === 'active').length;
-          const inactiveCount = products.filter(p => p.status === 'inactive').length;
-
-          this.setData({ products, activeCount, inactiveCount });
-          wx.showToast({ title: '已删除', icon: 'success' });
+          try {
+            const db = wx.cloud.database();
+            await db.collection('products').doc(id).remove();
+            this.loadProducts();
+            wx.showToast({ title: '已删除', icon: 'success' });
+          } catch (e) {
+            wx.showToast({ title: '删除失败', icon: 'none' });
+          }
         }
       }
     });

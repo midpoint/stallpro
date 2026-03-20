@@ -294,3 +294,43 @@
   padding: 100rpx;
   color: #999;
 }
+
+/* 摊位列表 */
+.stall-list {
+  padding: 30rpx;
+}
+
+.stall-list-title {
+  font-size: 36rpx;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 40rpx;
+  color: #333;
+}
+
+.stall-option {
+  background: white;
+  border-radius: 16rpx;
+  padding: 30rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 4rpx 12rpx rgba(0,0,0,0.05);
+}
+
+.stall-option-name {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 10rpx;
+}
+
+.stall-option-notice {
+  font-size: 26rpx;
+  color: #666;
+}
+
+.stall-list-empty {
+  text-align: center;
+  padding: 100rpx;
+  color: #999;
+  line-height: 1.8;
+}

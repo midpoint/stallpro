@@ -12,13 +12,63 @@
 }
 
 .avatar {
+  width: 120rpx;
+  height: 120rpx;
+  border-radius: 50%;
+  margin: 0 auto 16rpx;
+  display: block;
+  background: rgba(255,255,255,0.3);
+  text-align: center;
   font-size: 80rpx;
-  margin-bottom: 16rpx;
+  line-height: 120rpx;
+}
+
+.header image.avatar {
+  line-height: normal;
 }
 
 .nickname {
   font-size: 32rpx;
   font-weight: bold;
+}
+
+.stall-name {
+  font-size: 26rpx;
+  opacity: 0.9;
+  margin-top: 8rpx;
+}
+
+/* 今日数据 */
+.stats-card {
+  display: flex;
+  background: white;
+  margin: 20rpx;
+  border-radius: 16rpx;
+  padding: 30rpx 20rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0,0,0,0.06);
+}
+
+.stats-item {
+  flex: 1;
+  text-align: center;
+}
+
+.stats-value {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #FF6B35;
+}
+
+.stats-label {
+  font-size: 24rpx;
+  color: #666;
+  margin-top: 8rpx;
+}
+
+.stats-divider {
+  width: 1px;
+  background: #eee;
+  margin: 0 20rpx;
 }
 
 .menu-list {

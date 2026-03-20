@@ -1,6 +1,4 @@
 // pages/order/detail.js
-const API_BASE = 'https://stallpro.vercel.app/api';
-
 Page({
   data: {
     order: {},
@@ -24,18 +22,20 @@ Page({
     }
   },
 
-  loadOrder(orderId) {
+  async loadOrder(orderId) {
     const that = this;
-    wx.request({
-      url: `${API_BASE}/order/${orderId}`,
-      success(res) {
-        if (res.data.success) {
-          const order = res.data.data;
-          that.setData({ order });
-          that.updateStatus(order.status);
-        }
+
+    try {
+      const db = wx.cloud.database();
+      const res = await db.collection('orders').doc(orderId).get();
+
+      if (res.data) {
+        that.setData({ order: res.data });
+        that.updateStatus(res.data.status);
       }
-    });
+    } catch (e) {
+      console.log('loadOrder error:', e);
+    }
   },
 
   updateStatus(status) {

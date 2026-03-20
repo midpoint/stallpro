@@ -1,6 +1,5 @@
 // pages/order/order.js - 订单列表（顾客查看自己的订单）
 const app = getApp();
-const API_BASE = 'https://stallpro.vercel.app/api';
 
 Page({
   data: {
@@ -30,20 +29,22 @@ Page({
     }
   },
 
-  loadOrders() {
+  async loadOrders() {
     const stallId = app.globalData.stallId;
+    const that = this;
 
     // 如果是摊主，加载自己商铺的订单
     if (this.data.isOwner && stallId) {
-      const that = this;
-      wx.request({
-        url: `${API_BASE}/order/stall/${stallId}`,
-        success(res) {
-          if (res.data.success) {
-            that.setData({ orders: res.data.data.list || [] });
-          }
-        }
-      });
+      try {
+        const db = wx.cloud.database();
+        const ordersRes = await db.collection('orders').where({
+          stallId: stallId
+        }).orderBy('createdAt', 'desc').get();
+
+        that.setData({ orders: ordersRes.data || [] });
+      } catch (e) {
+        console.log('loadOrders error:', e);
+      }
     } else {
       // 顾客端，暂不显示历史订单（需要存储顾客订单）
       this.setData({ orders: [] });
@@ -66,38 +67,38 @@ Page({
   },
 
   // 摊主模式：接单
-  acceptOrder(e) {
+  async acceptOrder(e) {
     const orderId = e.currentTarget.dataset.id;
-    const that = this;
 
-    wx.request({
-      url: `${API_BASE}/order/${orderId}/status`,
-      method: 'PUT',
-      data: { status: 'cooking' },
-      success(res) {
-        if (res.data.success) {
-          wx.showToast({ title: '已接单', icon: 'success' });
-          that.loadOrders();
-        }
-      }
-    });
+    try {
+      const db = wx.cloud.database();
+      await db.collection('orders').doc(orderId).update({
+        data: { status: 'cooking' }
+      });
+      wx.showToast({ title: '已接单', icon: 'success' });
+      this.loadOrders();
+    } catch (e) {
+      wx.showToast({ title: '操作失败', icon: 'none' });
+    }
   },
 
   // 摊主模式：完成并叫号
-  completeOrder(e) {
+  async completeOrder(e) {
     const orderId = e.currentTarget.dataset.id;
-    const that = this;
 
-    wx.request({
-      url: `${API_BASE}/order/${orderId}/call`,
-      method: 'POST',
-      success(res) {
-        if (res.data.success) {
-          wx.showToast({ title: '已叫号', icon: 'success' });
-          that.loadOrders();
+    try {
+      const db = wx.cloud.database();
+      await db.collection('orders').doc(orderId).update({
+        data: {
+          status: 'completed',
+          calledAt: new Date()
         }
-      }
-    });
+      });
+      wx.showToast({ title: '已叫号', icon: 'success' });
+      this.loadOrders();
+    } catch (e) {
+      wx.showToast({ title: '操作失败', icon: 'none' });
+    }
   },
 
   onPullDownRefresh() {

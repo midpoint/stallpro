@@ -1,0 +1,64 @@
+<view class="container">
+  <view class="section">
+    <view class="section-title">微信收款账户</view>
+    <view class="settings-list">
+      <view class="setting-item">
+        <text class="setting-label">启用微信收款</text>
+        <switch checked="{{accounts.wechat.enabled}}" bindchange="toggleWechat" color="#FF6B35"/>
+      </view>
+      <view class="setting-item" bindtap="editWechatName">
+        <text class="setting-label">收款人姓名</text>
+        <view class="setting-value">{{accounts.wechat.name || '未设置'}}</view>
+        <view class="setting-arrow">></view>
+      </view>
+      <view class="setting-item" bindtap="editWechatAccount">
+        <text class="setting-label">收款账号</text>
+        <view class="setting-value">{{accounts.wechat.account || '未设置'}}</view>
+        <view class="setting-arrow">></view>
+      </view>
+      <view class="setting-item" bindtap="uploadWechatQrcode">
+        <text class="setting-label">收款二维码</text>
+        <view class="qrcode-thumb" wx:if="{{accounts.wechat.qrcodeUrl}}">
+          <image src="{{accounts.wechat.qrcodeUrl}}" mode="aspectFill"/>
+        </view>
+        <view class="setting-arrow upload" wx:else>上传</view>
+      </view>
+    </view>
+  </view>
+
+  <view class="section">
+    <view class="section-title">支付宝收款账户</view>
+    <view class="settings-list">
+      <view class="setting-item">
+        <text class="setting-label">启用支付宝收款</text>
+        <switch checked="{{accounts.alipay.enabled}}" bindchange="toggleAlipay" color="#FF6B35"/>
+      </view>
+      <view class="setting-item" bindtap="editAlipayName">
+        <text class="setting-label">收款人姓名</text>
+        <view class="setting-value">{{accounts.alipay.name || '未设置'}}</view>
+        <view class="setting-arrow">></view>
+      </view>
+      <view class="setting-item" bindtap="editAlipayAccount">
+        <text class="setting-label">收款账号</text>
+        <view class="setting-value">{{accounts.alipay.account || '未设置'}}</view>
+        <view class="setting-arrow">></view>
+      </view>
+      <view class="setting-item" bindtap="uploadAlipayQrcode">
+        <text class="setting-label">收款二维码</text>
+        <view class="qrcode-thumb" wx:if="{{accounts.alipay.qrcodeUrl}}">
+          <image src="{{accounts.alipay.qrcodeUrl}}" mode="aspectFill"/>
+        </view>
+        <view class="setting-arrow upload" wx:else>上传</view>
+      </view>
+    </view>
+  </view>
+
+  <view class="tip-box">
+    <text class="tip-icon">💡</text>
+    <text class="tip-text">提示：二维码需包含支付链接，顾客扫码后直接跳转支付页面。建议上传微信支付和支付宝的收款码图片。</text>
+  </view>
+
+  <view class="bottom-btns">
+    <button class="btn-save" bindtap="saveAccounts">保存设置</button>
+  </view>
+</view>

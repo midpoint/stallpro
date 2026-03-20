@@ -1,0 +1,57 @@
+<view class="payment-qrcode">
+  <view class="qrcode-modal {{show ? 'show' : ''}}" bindtap="hide">
+    <view class="qrcode-content" catchtap="stopPropagation">
+      <view class="qrcode-header">
+        <view class="qrcode-title">{{title}}</view>
+        <view class="qrcode-close" bindtap="hide">×</view>
+      </view>
+
+      <view class="qrcode-tabs">
+        <view class="qrcode-tab {{activeTab === 'wechat' ? 'active' : ''}}"
+              bindtap="switchTab" data-tab="wechat">
+          微信支付
+        </view>
+        <view class="qrcode-tab {{activeTab === 'alipay' ? 'active' : ''}}"
+              bindtap="switchTab" data-tab="alipay">
+          支付宝
+        </view>
+      </view>
+
+      <view class="qrcode-body">
+        <view wx:if="{{activeTab === 'wechat'}}" class="qrcode-section">
+          <view class="account-info" wx:if="{{wechatAccount.name || wechatAccount.account}}">
+            <text>收款人：{{wechatAccount.name || '未设置'}}</text>
+            <text wx:if="{{wechatAccount.account}}">账  号：{{wechatAccount.account}}</text>
+          </view>
+          <view class="qrcode-image" wx:if="{{wechatQrcode}}">
+            <image src="{{wechatQrcode}}" mode="aspectFit" />
+          </view>
+          <view class="qrcode-placeholder" wx:else>
+            <text class="placeholder-icon">💳</text>
+            <text class="placeholder-text">暂未设置微信收款码</text>
+            <text class="placeholder-tip">请在「收款账户设置」中上传</text>
+          </view>
+        </view>
+
+        <view wx:if="{{activeTab === 'alipay'}}" class="qrcode-section">
+          <view class="account-info" wx:if="{{alipayAccount.name || alipayAccount.account}}">
+            <text>收款人：{{alipayAccount.name || '未设置'}}</text>
+            <text wx:if="{{alipayAccount.account}}">账  号：{{alipayAccount.account}}</text>
+          </view>
+          <view class="qrcode-image" wx:if="{{alipayQrcode}}">
+            <image src="{{alipayQrcode}}" mode="aspectFit" />
+          </view>
+          <view class="qrcode-placeholder" wx:else>
+            <text class="placeholder-icon">💳</text>
+            <text class="placeholder-text">暂未设置支付宝收款码</text>
+            <text class="placeholder-tip">请在「收款账户设置」中上传</text>
+          </view>
+        </view>
+      </view>
+
+      <view class="qrcode-footer">
+        <text>顾客扫码支付，资金直达您的账户</text>
+      </view>
+    </view>
+  </view>
+</view>

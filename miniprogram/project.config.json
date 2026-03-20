@@ -40,6 +40,7 @@
     }
   },
   "compileType": "miniprogram",
+  "cloudfunctionRoot": "cloudfunctions/",
   "libVersion": "3.0.0",
   "appid": "wx29ed7b866c87a837",
   "projectname": "摆摊666",

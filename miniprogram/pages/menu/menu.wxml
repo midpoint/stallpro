@@ -2,10 +2,7 @@
 <view class="container">
   <!-- 头部信息 -->
   <view class="header">
-    <view class="header-top">
-      <view class="stall-name">{{stall.name}}</view>
-      <view class="owner-switch" bindtap="switchToOwner">我是摊主</view>
-    </view>
+    <view class="stall-name">{{stall.name}}</view>
     <view class="stall-notice">{{stall.notice}}</view>
   </view>
 

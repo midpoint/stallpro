@@ -2,9 +2,28 @@
 <view class="container">
   <!-- 用户信息 -->
   <view class="header">
-    <view class="avatar">{{userInfo.avatar || '👤'}}</view>
+    <image class="avatar" src="{{userInfo.avatar}}" mode="aspectFill" wx:if="{{userInfo.avatar}}" />
+    <view class="avatar" wx:else>👤</view>
     <view class="nickname">{{userInfo.nickname || '摊主'}}</view>
     <view class="stall-name" wx:if="{{stallName}}">{{stallName}}</view>
+  </view>
+
+  <!-- 今日数据 -->
+  <view class="stats-card">
+    <view class="stats-item">
+      <view class="stats-value">{{stats.orderCount}}</view>
+      <view class="stats-label">今日订单</view>
+    </view>
+    <view class="stats-divider"></view>
+    <view class="stats-item">
+      <view class="stats-value">¥{{stats.todayRevenue}}</view>
+      <view class="stats-label">今日营收</view>
+    </view>
+    <view class="stats-divider"></view>
+    <view class="stats-item">
+      <view class="stats-value">{{stats.pendingCount}}</view>
+      <view class="stats-label">待制作</view>
+    </view>
   </view>
 
   <!-- 功能菜单 -->
@@ -14,19 +33,24 @@
       <view class="menu-text">我的摊位</view>
       <view class="menu-arrow">></view>
     </view>
-    <view class="menu-item">
+    <view class="menu-item" bindtap="goToProducts">
+      <view class="menu-icon">🍔</view>
+      <view class="menu-text">商品管理</view>
+      <view class="menu-arrow">></view>
+    </view>
+    <view class="menu-item" bindtap="goToStats">
       <view class="menu-icon">📊</view>
-      <view class="menu-text">数据统计</view>
+      <view class="menu-text">数据分析</view>
       <view class="menu-arrow">></view>
     </view>
-    <view class="menu-item">
+    <view class="menu-item" bindtap="goToPaymentAccounts">
+      <view class="menu-icon">💳</view>
+      <view class="menu-text">收款账户</view>
+      <view class="menu-arrow">></view>
+    </view>
+    <view class="menu-item" bindtap="goToSettings">
       <view class="menu-icon">⚙️</view>
-      <view class="menu-text">设置</view>
-      <view class="menu-arrow">></view>
-    </view>
-    <view class="menu-item">
-      <view class="menu-icon">❓</view>
-      <view class="menu-text">帮助中心</view>
+      <view class="menu-text">店铺设置</view>
       <view class="menu-arrow">></view>
     </view>
   </view>
